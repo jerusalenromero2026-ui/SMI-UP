@@ -21,3 +21,4 @@
 # Archivos del sistema/editor
 .DS_Store
 Thumbs.db
+.vercel
