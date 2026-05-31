@@ -3,1799 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMINIASDIMOR PLATFORM v9.0 - GestiÃ³n Ministerial</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>AMINIASDIMOR â€” Fe y Esperanza | Tarapoto</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            900: '#001d36',
-                            800: '#002d54',
-                            700: '#004077',
-                            600: '#005b9f',
-                            accent: '#F05A28',
-                            accentHover: '#d94b1f'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
 
     <style>
-        body { overflow: hidden; font-size: 0.85rem; background-color: #004077; transition: background-color 0.8s ease; }
-        .app-loaded body { background-color: #f8fafc; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .hidden-section { display: none !important; }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .glass-panel { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.05); }
-        .sidebar-glass { background: linear-gradient(180deg, rgba(0,29,54,0.98) 0%, rgba(0,64,119,0.98) 100%); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
-        .loader-ring { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #F05A28; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 300px; padding: 16px 20px; border-radius: 12px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: flex-start; gap: 12px; transform: translateX(120%); animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .toast.closing { animation: toastOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes toastIn { to { transform: translateX(0); } }
-        @keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
-        .tab-content.active { display: block; }
-        .tab-btn.active { border-bottom: 3px solid #F05A28; color: #004077; font-weight: 900; }
-        .badge-superadmin { background: linear-gradient(135deg,#f59e0b,#d97706); }
-        .badge-pastor { background: linear-gradient(135deg,#3b82f6,#1d4ed8); }
-        .badge-sede { background: linear-gradient(135deg,#10b981,#059669); }
+        :root {
+            /* Paleta Oficial del Logo */
+            --logo-blue:       #1a4f8a;
+            --logo-blue-dark:  #0a1c3c;
+            --logo-orange:     #E05C1A;
+            --logo-orange-dim: rgba(224, 92, 26, 0.15);
+            
+            /* Colores de Contraste */
+            --white:           #ffffff;
+            --pearl:           #f8fafc;
+            --text-dark:       #1e293b;
+            --text-light:      #f1f5f9;
+            --text-muted:      #94a3b8;
+            
+            /* Sombras Elegantes */
+            --shadow-soft:     0 10px 40px rgba(10, 28, 60, 0.08);
+            --shadow-dark:     0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-dark); 
+            background: var(--pearl); 
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ===== ELEMENTOS FLOTANTES (LUZ DIVINA) ===== */
+        .divine-light {
+            position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+        }
+        .light-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--logo-orange-dim); }
+        .light-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: rgba(26, 79, 138, 0.2); }
+
+        /* ===== NAVBAR ===== */
+        #navbar {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(10, 28, 60, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        #navbar.scrolled {
+            background: var(--white);
+            box-shadow: var(--shadow-soft);
+            border-bottom: 1px solid rgba(26, 79, 138, 0.1);
+        }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; height: 75px;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-brand img { 
+            width: 36px; height: auto; object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .nav-brand:hover img { transform: scale(1.05); }
+        .nav-brand-text { display: flex; flex-direction: column; }
+        .nav-brand-text span:first-child { 
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: 0.1em; transition: color 0.3s;
+        }
+        .nav-brand-text span:last-child { 
+            font-size: 8.5px; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.15em; transition: color 0.3s;
+        }
+        
+        #navbar.scrolled .nav-brand-text span:first-child { color: var(--logo-blue-dark); }
+        #navbar.scrolled .nav-brand-text span:last-child { color: var(--logo-blue); }
+        #navbar.scrolled .nav-links a:not(.btn-elegant) { color: var(--logo-blue-dark); }
+        
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a:not(.btn-elegant) { 
+            color: var(--white); text-decoration: none; font-size: 10px; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 0.15em; transition: 0.3s; position: relative;
+        }
+        .nav-links a:not(.btn-elegant)::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -6px; left: 0;
+            background-color: var(--logo-orange); transition: width 0.3s ease;
+        }
+        .nav-links a:not(.btn-elegant):hover::after { width: 100%; }
+        
+        .btn-elegant {
+            background: var(--logo-orange); color: var(--white); text-decoration: none;
+            padding: 10px 22px; border-radius: 6px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.15em; border: 1px solid var(--logo-orange);
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(224, 92, 26, 0.3);
+        }
+        .btn-elegant:hover { 
+            background: var(--logo-blue-dark); border-color: var(--logo-blue-dark);
+            box-shadow: 0 6px 20px rgba(10, 28, 60, 0.4); transform: translateY(-2px);
+        }
+
+        /* ===== HERO ===== */
+        #hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 120px 2rem 60px; position: relative;
+            background: linear-gradient(145deg, var(--logo-blue-dark) 0%, var(--logo-blue) 100%);
+            color: var(--white); overflow: hidden;
+        }
+        
+        @keyframes float-gentle {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-content { position: relative; z-index: 10; max-width: 850px; animation: float-gentle 8s ease-in-out infinite; }
+        .hero-badge {
+            display: inline-block; padding: 8px 20px; border-radius: 30px;
+            border: 1px solid rgba(224, 92, 26, 0.4); background: rgba(255, 255, 255, 0.05);
+            font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--logo-orange); margin-bottom: 28px; backdrop-filter: blur(10px);
+        }
+        #hero h1 {
+            font-family: 'Cinzel', serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 600; line-height: 1.1; margin-bottom: 24px; color: var(--white);
+        }
+        #hero h1 em { 
+            font-family: 'Playfair Display', serif; font-style: italic; color: var(--logo-orange); 
+        }
+        .hero-sub { 
+            font-size: 1.1rem; color: var(--text-light); margin-bottom: 45px; 
+            font-weight: 300; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.9;
+        }
+
+        /* ===== SECTIONS GENERIC ===== */
+        .section-padding { padding: 100px 2rem; position: relative; }
+        .section-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-label { 
+            color: var(--logo-orange); font-size: 10px; font-weight: 700; letter-spacing: 0.3em; 
+            text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .section-label::before, .section-label::after { content: ''; width: 30px; height: 1.5px; background: var(--logo-orange); opacity: 0.6; }
+        .section-title { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--logo-blue-dark); font-weight: 600; }
+
+        /* ===== 3D CARDS ===== */
+        .bg-light { background: var(--pearl); }
+        .grid-3d { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 30px; perspective: 1200px; 
+        }
+        .card-3d {
+            background: var(--white); border: 1px solid rgba(26, 79, 138, 0.08);
+            border-radius: 12px; padding: 40px 30px; text-align: center;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .card-3d::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: var(--logo-orange); border-radius: 0 0 12px 12px;
+            transform: scaleX(0); transition: transform 0.4s ease; transform-origin: center;
+        }
+        .card-3d:hover {
+            transform: translateY(-12px) rotateX(5deg) rotateY(-5deg);
+            box-shadow: 20px 30px 40px rgba(26, 79, 138, 0.1);
+            border-color: rgba(224, 92, 26, 0.3);
+        }
+        .card-3d:hover::after { transform: scaleX(1); }
+        .card-icon { 
+            font-size: 2.5rem; margin-bottom: 20px; color: var(--logo-blue);
+            transform: translateZ(40px); display: inline-block; transition: transform 0.4s;
+        }
+        .card-3d:hover .card-icon { transform: translateZ(50px) scale(1.1); color: var(--logo-orange); }
+        .card-3d h4 { 
+            font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--logo-blue-dark); 
+            margin-bottom: 12px; transform: translateZ(30px); font-weight: 700;
+        }
+        .card-3d p { color: var(--text-dark); font-size: 0.95rem; transform: translateZ(20px); opacity: 0.8; }
+
+        /* ===== MAPA ELEGANTE ===== */
+        .map-container {
+            border-radius: 12px; overflow: hidden; padding: 8px;
+            background: var(--white); box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(26, 79, 138, 0.1);
+        }
+        #map { height: 450px; border-radius: 8px; background: #f8fafc; z-index: 1; }
+        
+        .elegant-pin { display: flex; align-items: center; justify-content: center; }
+        .pin-core { 
+            width: 16px; height: 16px; background: var(--logo-orange); border-radius: 50%; 
+            position: relative; z-index: 2; box-shadow: 0 0 0 4px var(--white), 0 4px 10px rgba(0,0,0,0.2); 
+        }
+        .pin-pulse { 
+            position: absolute; width: 45px; height: 45px; background: rgba(224, 92, 26, 0.3); 
+            border-radius: 50%; animation: pulse-soft 2.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1); 
+        }
+        .pin-label {
+            position: absolute; left: 29px; top: 50%; transform: translateY(-50%);
+            padding: 4px 8px; border-radius: 999px; white-space: nowrap;
+            background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(26, 79, 138, 0.14);
+            box-shadow: 0 5px 16px rgba(10, 28, 60, 0.12);
+            color: var(--logo-blue-dark); font-size: 9px; font-weight: 700;
+            font-family: 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        @keyframes pulse-soft {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .leaflet-popup-content-wrapper { 
+            background: var(--logo-blue-dark); color: var(--white); border-radius: 8px; 
+            box-shadow: 0 15px 35px rgba(10, 28, 60, 0.3); border: 1px solid rgba(255,255,255,0.1); padding: 4px;
+        }
+        .leaflet-popup-tip { background: var(--logo-blue-dark); }
+        .popup-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--logo-orange); margin-bottom: 6px; font-weight: 700; }
+        .popup-btn {
+            display: inline-flex; align-items: center; justify-content: center; margin-top: 12px; 
+            padding: 8px 16px; background: var(--white); color: var(--logo-blue-dark); 
+            text-decoration: none; border-radius: 4px; font-size: 10px; font-weight: 700; 
+            text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s; width: 100%;
+        }
+        .popup-btn:hover { background: var(--logo-orange); color: var(--white); }
+
+        /* ===== SEARCH PANEL ===== */
+        .bg-dark-section { background: var(--logo-blue-dark); color: var(--white); }
+        .bg-dark-section .section-title { color: var(--white); }
+        
+        .search-glass {
+            padding: 50px; border-radius: 16px; 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: var(--shadow-dark);
+            display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+        }
+        .input-elegant {
+            flex: 1; min-width: 250px; background: rgba(255, 255, 255, 0.06); 
+            border: 1px solid rgba(255, 255, 255, 0.15); padding: 18px 24px; 
+            border-radius: 8px; color: var(--white); font-family: inherit; transition: all 0.3s; outline: none; font-size: 0.95rem;
+        }
+        .input-elegant::placeholder { color: rgba(255,255,255,0.4); }
+        .input-elegant:focus { border-color: var(--logo-orange); background: rgba(255, 255, 255, 0.1); }
+        .directory-results { flex-basis: 100%; display: grid; gap: 10px; margin-top: 10px; }
+        .directory-result {
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            padding: 13px 16px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .directory-result strong {
+            display: block; color: var(--white); font-size: 12px; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .directory-result span, .directory-message {
+            color: rgba(255,255,255,0.58); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+        }
+        .directory-message { flex-basis: 100%; text-align: center; padding: 14px 0 0; }
+
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-brand-accent selection:text-white">
+<body>
 
-    <div id="mainLoader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-brand-900 transition-opacity duration-1000">
-        <div class="relative flex items-center justify-center mb-10">
-            <div class="loader-ring absolute"></div>
-            <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" class="w-10 opacity-90 animate-pulse">
-        </div>
-        <div class="text-center">
-            <h1 class="text-white font-black text-xs uppercase tracking-[0.8em]">AMINIASDIMOR CORE</h1>
-            <p class="text-blue-400 text-[9px] mt-3 uppercase font-medium tracking-widest opacity-70" id="loaderText">Iniciando mÃ³dulos...</p>
-            <div class="w-48 h-1 bg-white/10 rounded-full mt-6 overflow-hidden mx-auto">
-                <div id="loaderProgress" class="h-full bg-brand-accent w-0 transition-all duration-1000 ease-out"></div>
+<section id="hero">
+    <div class="divine-light light-1"></div>
+    <div class="divine-light light-2"></div>
+    
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" alt="Logo AMINIASDIMOR">
+                <div class="nav-brand-text">
+                    <span>AMINIASDIMOR</span>
+                    <span>UniÃ³n Peruana</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="#sedes">Congregaciones</a>
+                <a href="#mapa">Mapa de Sedes</a>
+                <a href="./sistema.html" class="btn-elegant">Acceso Sistema</a>
             </div>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <div class="hero-badge">MisiÃ³n Oriente Â· San MartÃ­n</div>
+        <h1>Fundados en la <em>Verdad</em><br>Guiados por la Fe</h1>
+        <p class="hero-sub">Iglesia Adventista del SÃ©ptimo DÃ­a, Movimiento de Reforma.<br>Predicando el evangelio eterno con reverencia y dedicaciÃ³n.</p>
+        <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
+            <a href="#mapa" class="btn-elegant">Encontrar una Iglesia</a>
+            <a href="#buscador" class="btn-elegant" style="background: transparent; color: var(--white); border-color: rgba(255,255,255,0.3); box-shadow: none;">Directorio</a>
         </div>
     </div>
+</section>
 
-    <div id="toast-container"></div>
-
-    <div id="loginSection" class="h-full flex items-center justify-center p-6 hidden-section fade-in relative">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-600/20 blur-[120px] rounded-full pointer-events-none"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-accent/10 blur-[120px] rounded-full pointer-events-none"></div>
-
-        <div class="max-w-6xl w-full bg-white rounded-[2rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col md:flex-row min-h-[650px] relative z-10">
-            <div class="md:w-[45%] bg-gradient-to-br from-brand-800 to-brand-900 p-16 text-white flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
-                <div class="relative z-10">
-                    <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" class="w-24 mb-10 drop-shadow-2xl">
-                    <h2 class="text-4xl font-black italic uppercase tracking-tighter mb-2 leading-none">AMINIASDIMOR<br><span class="text-brand-accent">PLATFORM</span></h2>
-                    <p class="text-blue-300 text-[10px] uppercase tracking-[0.5em] font-bold">UniÃ³n Peruana - V9.0</p>
-                    <div class="mt-8 space-y-2">
-                        <div class="flex items-center gap-3 text-[10px] font-bold"><span class="w-5 h-5 rounded-full badge-superadmin flex items-center justify-center text-white text-[8px]">ðŸ‘‘</span><span class="text-amber-300">SÃºper Admin â€” Control Total</span></div>
-                        <div class="flex items-center gap-3 text-[10px] font-bold"><span class="w-5 h-5 rounded-full badge-pastor flex items-center justify-center text-white text-[8px]">â›ª</span><span class="text-blue-300">Pastor / Obrero â€” GestiÃ³n de Sedes</span></div>
-                        <div class="flex items-center gap-3 text-[10px] font-bold"><span class="w-5 h-5 rounded-full badge-sede flex items-center justify-center text-white text-[8px]">ðŸ </span><span class="text-emerald-300">Sede Local â€” Acceso Restringido</span></div>
-                    </div>
-                </div>
-                <div class="relative z-10 mt-8">
-                    <div class="w-12 h-1 bg-brand-accent rounded-full mb-6"></div>
-                    <p class="font-serif italic text-base leading-relaxed opacity-90">"Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de quÃ© avergonzarse."</p>
-                    <span class="text-[10px] font-sans font-black tracking-widest mt-3 block uppercase text-brand-accent">2 Timoteo 2:15</span>
-                </div>
+<section id="sedes" class="section-padding bg-light">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">Comunidad y Fe</div>
+            <h2 class="section-title">Congregaciones en Tarapoto</h2>
+        </div>
+        
+        <div class="grid-3d">
+            <div class="card-3d">
+                <span class="card-icon">ï¸</span>
+                <h4>Central Tarapoto</h4>
+                <p>El nÃºcleo principal de adoraciÃ³n y reuniones espirituales en el corazÃ³n de la ciudad.</p>
             </div>
-
-            <div class="md:w-[55%] p-16 flex flex-col justify-center bg-white relative">
-                <div class="mb-10">
-                    <h3 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Acceso Seguro</h3>
-                    <p class="text-slate-500 text-[11px] mt-2 font-semibold uppercase tracking-widest">Sistema de Control de MembresÃ­a</p>
-                </div>
-                <form id="loginForm" class="space-y-5">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Sede / JurisdicciÃ³n</label>
-                        <select id="loginSede" required class="w-full px-6 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-brand-600 focus:bg-white transition-all font-bold text-slate-700 cursor-pointer appearance-none">
-                            <option value="" disabled selected>Seleccione su entidad...</option>
-                            <option value="global" class="text-amber-600 font-black">ðŸ‘‘ NÃšCLEO ADMINISTRATIVO (Admin / Pastor)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Correo ElectrÃ³nico</label>
-                        <input type="email" id="loginEmail" required placeholder="usuario@iglesia.org" class="w-full px-6 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-brand-600 focus:bg-white transition-all font-semibold text-slate-700">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">ContraseÃ±a</label>
-                        <input type="password" id="loginPass" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" class="w-full px-6 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-brand-600 focus:bg-white transition-all font-semibold text-slate-700">
-                    </div>
-                    <button type="submit" class="w-full bg-brand-700 text-white font-black py-5 rounded-xl shadow-[0_10px_20px_rgba(0,64,119,0.2)] hover:bg-brand-800 active:scale-[0.98] transition-all uppercase text-[11px] tracking-[0.2em] mt-6">
-                        Iniciar SesiÃ³n
-                    </button>
-                </form>
-                <div class="mt-8 flex flex-col md:flex-row justify-between items-center border-t border-slate-100 pt-6 gap-4">
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <label class="text-brand-600 hover:text-brand-800 font-black text-[10px] uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-2">
-                            <span>ðŸ”„ Fusionar BD</span>
-                            <input type="file" class="hidden" accept=".json" onchange="App.DB.mergeBackup(this)">
-                        </label>
-                        <label class="text-slate-400 hover:text-brand-600 font-bold text-[10px] uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-2">
-                            <span>ðŸ“‚ Restaurar DB</span>
-                            <input type="file" class="hidden" accept=".json" onchange="App.DB.importBackup(this)">
-                        </label>
-                    </div>
-                </div>
+            <div class="card-3d">
+                <span class="card-icon">ï¸</span>
+                <h4>Morales</h4>
+                <p>Un refugio de paz y comuniÃ³n para nuestros hermanos en el distrito de Morales.</p>
+            </div>
+            <div class="card-3d">
+                <span class="card-icon"></span>
+                <h4>Santa Anita</h4>
+                <p>CongregaciÃ³n dedicada al estudio profundo y la expansiÃ³n del mensaje eterno.</p>
+            </div>
+            <div class="card-3d">
+                <span class="card-icon">ï¸</span>
+                <h4>10 de Agosto</h4>
+                <p>Una comunidad vibrante, unida en el amor fraternal y el servicio cristiano.</p>
             </div>
         </div>
     </div>
+</section>
 
-    <div id="appSection" class="hidden-section h-screen w-full flex bg-slate-50 fade-in">
-        <aside class="w-72 sidebar-glass text-white flex flex-col shadow-2xl z-20 transition-all duration-300">
-            <div class="p-8 border-b border-white/10 bg-black/20 text-center relative">
-                <div class="absolute top-2 right-2 px-2 py-1 bg-white/10 rounded text-[7px] font-mono tracking-widest">v9.0.0</div>
-                <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" class="w-16 mx-auto mb-4 drop-shadow-xl hover:scale-110 transition-transform duration-500">
-                <span id="displayUserRole" class="text-[9px] text-white px-4 py-1.5 rounded-full font-black uppercase mb-3 inline-block shadow-lg tracking-widest border border-white/20 bg-brand-accent">...</span>
-                <h4 id="currentEntityName" class="font-black text-xs uppercase tracking-tight truncate leading-tight mt-1 text-blue-100"></h4>
-                <p id="currentEntityUser" class="text-[9px] text-blue-300/60 mt-2 truncate"></p>
-            </div>
-            <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto" id="mainNav"></nav>
-            <div class="p-6 border-t border-white/10 space-y-3 bg-black/20">
-                <label class="w-full py-3.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-[10px] font-black uppercase hover:bg-blue-600 hover:text-white transition-all tracking-widest flex justify-center items-center gap-2 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                    Combinar BD
-                    <input type="file" class="hidden" accept=".json" onchange="App.DB.mergeBackup(this)">
-                </label>
-                <button onclick="App.DB.exportBackup()" class="w-full py-3.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-600 hover:text-white transition-all tracking-widest flex justify-center items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                    Respaldar Data
-                </button>
-                <button onclick="App.DB.exportPublicDirectory()" class="w-full py-3.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-[10px] font-black uppercase hover:bg-amber-500 hover:text-white transition-all tracking-widest flex justify-center items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"></path></svg>
-                    Publicar Directorio
-                </button>
-                <button onclick="App.Auth.logout()" class="w-full py-3.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all tracking-widest flex justify-center items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Cerrar SesiÃ³n
-                </button>
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
-            <header class="h-24 bg-white border-b border-slate-200 flex items-center justify-between px-10 shadow-sm z-10 sticky top-0">
-                <div class="flex items-center gap-5">
-                    <div class="w-1.5 h-12 bg-brand-700 rounded-full"></div>
-                    <div>
-                        <h2 id="viewTitle" class="text-2xl font-black text-brand-900 uppercase tracking-tight leading-none">Dashboard</h2>
-                        <p id="viewSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Resumen General</p>
-                    </div>
-                </div>
-                <div id="headerActions" class="flex gap-3 items-center"></div>
-            </header>
-            <div id="contentArea" class="flex-1 overflow-y-auto p-10 pb-24 slide-up relative"></div>
-        </main>
-    </div>
-
-    <div id="modalGlobal" class="fixed inset-0 bg-brand-900/80 backdrop-blur-sm flex items-center justify-center hidden z-[100] p-4 sm:p-6 transition-opacity duration-300 opacity-0">
-        <div class="bg-white p-0 rounded-[2rem] max-w-4xl w-full shadow-[0_50px_100px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col max-h-[95vh] relative transform scale-95 transition-transform duration-300" id="modalContainer">
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 id="modalTitle" class="text-xl font-black uppercase tracking-tight text-brand-800">TÃ­tulo Modal</h3>
-                <button onclick="App.UI.Modals.close()" class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center font-bold transition-colors">âœ•</button>
-            </div>
-            <div id="modalContent" class="p-8 overflow-y-auto"></div>
+<section id="mapa" class="section-padding bg-light" style="padding-top: 0;">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">Rutas de Esperanza</div>
+            <h2 class="section-title">Encuentre su Camino</h2>
+            <p style="color: var(--text-muted); margin-top: 10px;">Seleccione una ubicaciÃ³n para iniciar la navegaciÃ³n guiada hacia nuestras puertas.</p>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
         </div>
     </div>
-
-    <script>
-    const App = {
-        State: {
-            user: null,
-            tempImage: "",
-            activeView: 'dashboard',
-            currentList: [],
-            charts: []
-        },
-
-        Constants: {
-            STORAGE_USERS:     'amin_users_v9',
-            STORAGE_CHURCHES:  'amin_churches_v9',
-            STORAGE_MEMBERS:   'amin_members_v9',
-            STORAGE_TRANSFERS: 'amin_transfers_v9',
-            SUPABASE_URL:      'https://huemneiieuaupoelzhxf.supabase.co',
-            SUPABASE_ANON_KEY: 'sb_publishable_0JjouF78Punamok9A0zdPA_fhcUwFS6'
-        },
-
-        // ===================== DB =====================
-        DB: {
-            client: null,
-            tables: {
-                amin_users_v9: 'perfiles',
-                amin_churches_v9: 'iglesias',
-                amin_members_v9: 'miembros',
-                amin_transfers_v9: 'traslados'
-            },
-            initializeClient: function() {
-                if (!this.client) this.client = window.supabase.createClient(App.Constants.SUPABASE_URL, App.Constants.SUPABASE_ANON_KEY);
-            },
-            setLocal: function(key, val) {
-                try { localStorage.setItem(key, JSON.stringify(val)); }
-                catch(e) { App.UI.Toasts.show("Error", "Almacenamiento local lleno.", "error"); }
-            },
-            loadCollection: async function(key) {
-                const table = this.tables[key];
-                const fields = key === App.Constants.STORAGE_USERS ? 'user_id,data' : 'id,data';
-                const { data, error } = await this.client.from(table).select(fields);
-                if (error) throw error;
-                const records = (data || []).map(row => ({ ...row.data, id: row.data.id || row.user_id || row.id }));
-                this.setLocal(key, records);
-                return records;
-            },
-            loadPrivateData: async function() {
-                await Promise.all([
-                    this.loadCollection(App.Constants.STORAGE_MEMBERS),
-                    this.loadCollection(App.Constants.STORAGE_TRANSFERS),
-                    this.loadCollection(App.Constants.STORAGE_USERS)
-                ]);
-            },
-            get: function(key) {
-                try { return JSON.parse(localStorage.getItem(key)) || []; }
-                catch(e) { return []; }
-            },
-            set: function(key, val) {
-                try { localStorage.setItem(key, JSON.stringify(val)); }
-                catch(e) { App.UI.Toasts.show("Error", "Almacenamiento lleno (5MB).", "error"); }
-            },
-            syncPublicDirectory: function() {
-                const members = this.get(App.Constants.STORAGE_MEMBERS);
-                const pub = members.filter(m => m.estado !== 'Inactivo').map(m => ({ nombre: m.nombre, iglesia: m.iglesiaNombre }));
-                localStorage.setItem('_publicDirectory', JSON.stringify(pub));
-                return pub;
-            },
-            exportPublicDirectory: function() {
-                const pub = this.syncPublicDirectory();
-                const blob = new Blob([JSON.stringify(pub, null, 2)], { type: 'application/json' });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'public-members.json'; a.click();
-                App.UI.Toasts.show("Directorio Exportado", "Sube public-members.json a tu repositorio GitHub.", "success");
-            },
-            exportBackup: function() {
-                const data = {
-                    system: "AMINIASDIMOR_V9", timestamp: new Date().toISOString(),
-                    users: this.get(App.Constants.STORAGE_USERS),
-                    churches: this.get(App.Constants.STORAGE_CHURCHES),
-                    members: this.get(App.Constants.STORAGE_MEMBERS),
-                    transfers: this.get(App.Constants.STORAGE_TRANSFERS)
-                };
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `AMINIAS_DB_${Date.now()}.json`; a.click();
-                App.UI.Toasts.show("Respaldo Creado", "Base de datos exportada.", "success");
-            },
-            importBackup: function(input) {
-                if (!input.files || !input.files[0]) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (data.system && data.members) {
-                            this.setLocal(App.Constants.STORAGE_USERS, []);
-                            this.set(App.Constants.STORAGE_CHURCHES, data.churches || []);
-                            this.set(App.Constants.STORAGE_MEMBERS, data.members);
-                            this.set(App.Constants.STORAGE_TRANSFERS, data.transfers || []);
-                            App.UI.Toasts.show("RestauraciÃ³n Exitosa", "Reiniciando en 3 segundos...", "success");
-                            setTimeout(() => location.reload(), 3000);
-                        } else throw new Error();
-                    } catch { App.UI.Toasts.show("Error", "Archivo corrupto o incompatible.", "error"); }
-                };
-                reader.readAsText(input.files[0]);
-            },
-            mergeBackup: function(input) {
-                if (!input.files || !input.files[0]) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (data.system && data.members && data.churches) {
-                            let lc = this.get(App.Constants.STORAGE_CHURCHES), ca = 0;
-                            data.churches.forEach(ic => { const x = lc.findIndex(c => c.id === ic.id); x === -1 ? (lc.push(ic), ca++) : (lc[x] = {...lc[x], ...ic}); });
-                            this.set(App.Constants.STORAGE_CHURCHES, lc);
-
-                            let lm = this.get(App.Constants.STORAGE_MEMBERS), ma = 0, mu = 0;
-                            data.members.forEach(im => {
-                                const x = lm.findIndex(m => m.id === im.id || (m.dni && im.dni && m.dni === im.dni));
-                                x === -1 ? (lm.push(im), ma++) : (lm[x] = {...lm[x], ...im}, mu++);
-                            });
-                            this.set(App.Constants.STORAGE_MEMBERS, lm);
-
-                            App.UI.Toasts.show("FusiÃ³n Completada", `+${ma} miembros, +${ca} sedes, ${mu} actualizados.`, "success");
-                            if (App.State.user) {
-                                if (App.State.activeView === 'dashboard') App.UI.Views.renderDashboard();
-                                else if (App.State.activeView === 'members') App.UI.Views.renderMembers();
-                                else if (App.State.activeView === 'churches') App.UI.Views.renderChurches();
-                            } else App.Auth.init();
-                        } else throw new Error();
-                    } catch { App.UI.Toasts.show("Error de FusiÃ³n", "Archivo incompatible.", "error"); }
-                    finally { input.value = ""; }
-                };
-                reader.readAsText(input.files[0]);
-            },
-            init: async function() {
-                this.initializeClient();
-                this.setLocal(App.Constants.STORAGE_USERS, []);
-                this.setLocal(App.Constants.STORAGE_MEMBERS, []);
-                this.setLocal(App.Constants.STORAGE_TRANSFERS, []);
-                try {
-                    await this.loadCollection(App.Constants.STORAGE_CHURCHES);
-                } catch(e) {
-                    this.setLocal(App.Constants.STORAGE_CHURCHES, []);
-                    console.error('No se pudieron cargar las sedes de Supabase:', e.message);
-                }
-            },
-            set: function(key, val) {
-                this.setLocal(key, val);
-                if (App.State.user) this.persistCollection(key, val);
-            },
-            persistCollection: async function(key, records) {
-                const table = this.tables[key];
-                if (!table || !this.client) return;
-                try {
-                    const idField = key === App.Constants.STORAGE_USERS ? 'user_id' : 'id';
-                    const rows = records.map(record => {
-                        const clean = { ...record };
-                        delete clean.pass;
-                        return { [idField]: String(record.id), data: clean };
-                    });
-                    const { data: existing, error: readError } = await this.client.from(table).select(idField);
-                    if (readError) throw readError;
-                    if (rows.length) {
-                        const { error: upsertError } = await this.client.from(table).upsert(rows);
-                        if (upsertError) throw upsertError;
-                    }
-                    const kept = new Set(rows.map(row => row[idField]));
-                    for (const row of (existing || [])) {
-                        if (!kept.has(String(row[idField]))) {
-                            const { error: deleteError } = await this.client.from(table).delete().eq(idField, row[idField]);
-                            if (deleteError) throw deleteError;
-                        }
-                    }
-                } catch(e) {
-                    App.UI.Toasts.show("Sincronizacion", "No fue posible guardar los cambios en la nube.", "error");
-                    console.error(e);
-                }
-            }
-        },
-
-        // ===================== AUTH =====================
-        Auth: {
-            ROLES: {
-                superadmin: { label: 'ðŸ‘‘ SÃºper Admin',       badge: 'bg-amber-500' },
-                pastor:     { label: 'â›ª Pastor / Obrero',   badge: 'bg-blue-600' },
-                sede:       { label: 'ðŸ  Sede Local',        badge: 'bg-emerald-600' }
-            },
-            init: function() {
-                const select = document.getElementById('loginSede');
-                while (select.options.length > 2) select.remove(2);
-                App.DB.get(App.Constants.STORAGE_CHURCHES).forEach(c => {
-                    const opt = new Option(c.nombre, c.id);
-                    select.add(opt);
-                });
-                const form = document.getElementById('loginForm');
-                const newForm = form.cloneNode(true);
-                form.parentNode.replaceChild(newForm, form);
-                newForm.addEventListener('submit', this.handleLogin.bind(this));
-            },
-            handleLogin: function(e) {
-                e.preventDefault();
-                const sid   = document.getElementById('loginSede').value;
-                const email = document.getElementById('loginEmail').value.trim();
-                const pass  = document.getElementById('loginPass').value.trim();
-                const users = App.DB.get(App.Constants.STORAGE_USERS);
-                const user  = users.find(u => u.email === email && u.pass === pass);
-
-                if (!user) return App.UI.Toasts.show("Acceso Denegado", "Correo o contraseÃ±a incorrectos.", "error");
-
-                if (user.rol === 'sede' && user.iglesiaId !== sid)
-                    return App.UI.Toasts.show("Acceso Denegado", "Esta sede no corresponde a sus credenciales.", "error");
-
-                if ((user.rol === 'superadmin' || user.rol === 'pastor') && sid !== 'global')
-                    return App.UI.Toasts.show("Acceso Denegado", "Admin y Pastores deben seleccionar 'NÃºcleo Administrativo'.", "error");
-
-                App.State.user = { ...user, sedeId: sid, iglesiaIds: user.iglesiaIds || [] };
-
-                if (sid === 'global') {
-                    App.State.user.sedeNombre = "GESTIÃ“N GLOBAL";
-                } else {
-                    const ch = App.DB.get(App.Constants.STORAGE_CHURCHES).find(c => c.id === sid);
-                    App.State.user.sedeNombre = ch ? ch.nombre : user.nombre;
-                }
-                this.launchApp();
-            },
-            launchApp: function() {
-                document.getElementById('loginSection').classList.add('hidden-section');
-                document.getElementById('appSection').classList.remove('hidden-section');
-                document.body.classList.add('app-loaded');
-                const roleInfo = App.Auth.ROLES[App.State.user.rol] || { label: App.State.user.rol };
-                document.getElementById('currentEntityName').innerText = App.State.user.sedeNombre;
-                document.getElementById('currentEntityUser').innerText = App.State.user.email;
-                document.getElementById('displayUserRole').innerText = roleInfo.label;
-                App.UI.Navigation.build();
-                App.UI.Views.renderDashboard();
-                App.UI.Toasts.show("Bienvenido", `SesiÃ³n iniciada como ${App.State.user.nombre}`, "success");
-            },
-            logout: function() {
-                App.State.user = null;
-                document.getElementById('appSection').classList.add('hidden-section');
-                document.getElementById('loginSection').classList.remove('hidden-section');
-                document.body.classList.remove('app-loaded');
-                document.getElementById('loginForm').reset();
-                App.Auth.init();
-            },
-            handleLogin: async function(e) {
-                e.preventDefault();
-                const sid = document.getElementById('loginSede').value;
-                const email = document.getElementById('loginEmail').value.trim();
-                const password = document.getElementById('loginPass').value;
-                const { data: sessionData, error: authError } = await App.DB.client.auth.signInWithPassword({ email, password });
-                if (authError || !sessionData.user) {
-                    return App.UI.Toasts.show("Acceso Denegado", "Correo o contrasena incorrectos.", "error");
-                }
-                const { data: profile, error: profileError } = await App.DB.client
-                    .from('perfiles')
-                    .select('data')
-                    .eq('user_id', sessionData.user.id)
-                    .single();
-                if (profileError || !profile) {
-                    await App.DB.client.auth.signOut();
-                    return App.UI.Toasts.show("Acceso Denegado", "El usuario no tiene un perfil autorizado.", "error");
-                }
-                const user = { ...profile.data, id: sessionData.user.id, email: sessionData.user.email };
-                if (user.activo === false) {
-                    await App.DB.client.auth.signOut();
-                    return App.UI.Toasts.show("Acceso Denegado", "El usuario se encuentra desactivado.", "error");
-                }
-                if (user.rol === 'sede' && user.iglesiaId !== sid) {
-                    await App.DB.client.auth.signOut();
-                    return App.UI.Toasts.show("Acceso Denegado", "Esta sede no corresponde a sus credenciales.", "error");
-                }
-                if ((user.rol === 'superadmin' || user.rol === 'pastor') && sid !== 'global') {
-                    await App.DB.client.auth.signOut();
-                    return App.UI.Toasts.show("Acceso Denegado", "Seleccione el nucleo administrativo.", "error");
-                }
-                App.State.user = { ...user, sedeId: sid, iglesiaIds: user.iglesiaIds || [] };
-                try {
-                    await App.DB.loadPrivateData();
-                } catch(error) {
-                    App.State.user = null;
-                    await App.DB.client.auth.signOut();
-                    return App.UI.Toasts.show("Conexion", "No fue posible cargar la informacion del sistema.", "error");
-                }
-                if (sid === 'global') App.State.user.sedeNombre = "GESTION GLOBAL";
-                else {
-                    const ch = App.DB.get(App.Constants.STORAGE_CHURCHES).find(c => c.id === sid);
-                    App.State.user.sedeNombre = ch ? ch.nombre : user.nombre;
-                }
-                this.launchApp();
-            },
-            logout: async function() {
-                await App.DB.client.auth.signOut();
-                App.State.user = null;
-                App.DB.setLocal(App.Constants.STORAGE_USERS, []);
-                App.DB.setLocal(App.Constants.STORAGE_MEMBERS, []);
-                App.DB.setLocal(App.Constants.STORAGE_TRANSFERS, []);
-                document.getElementById('appSection').classList.add('hidden-section');
-                document.getElementById('loginSection').classList.remove('hidden-section');
-                document.body.classList.remove('app-loaded');
-                document.getElementById('loginForm').reset();
-                App.Auth.init();
-            }
-        },
-
-        // ===================== UI =====================
-        UI: {
-            Toasts: {
-                show: function(title, message, type = 'info') {
-                    const container = document.getElementById('toast-container');
-                    const toast = document.createElement('div');
-                    const types = {
-                        success: { bg: 'border-l-4 border-emerald-500', icon: 'âœ…', text: 'text-emerald-600' },
-                        error:   { bg: 'border-l-4 border-red-500',     icon: 'âŒ', text: 'text-red-600' },
-                        info:    { bg: 'border-l-4 border-blue-500',    icon: 'â„¹ï¸', text: 'text-blue-600' }
-                    };
-                    const t = types[type] || types.info;
-                    toast.className = `toast ${t.bg}`;
-                    toast.innerHTML = `<div class="text-xl">${t.icon}</div><div><h4 class="font-bold text-[11px] uppercase tracking-wider ${t.text}">${title}</h4><p class="text-xs text-slate-500 mt-1">${message}</p></div>`;
-                    container.appendChild(toast);
-                    setTimeout(() => { toast.classList.add('closing'); toast.addEventListener('animationend', () => toast.remove()); }, 4000);
-                }
-            },
-
-            Navigation: {
-                build: function() {
-                    const nav = document.getElementById('mainNav');
-                    nav.innerHTML = '';
-                    const rol = App.State.user.rol;
-
-                    const menus = {
-                        superadmin: [
-                            { t: 'Dashboard',          i: 'ðŸ“Š', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'Directorio Global',  i: 'ðŸŒ', a: () => App.UI.Views.renderMembers() },
-                            { t: 'GestiÃ³n de Sedes',   i: 'â›ª', a: () => App.UI.Views.renderChurches() },
-                            { t: 'GestiÃ³n de Usuarios',i: 'ðŸ‘¥', a: () => App.UI.Views.renderUsers() },
-                            { t: 'Transferencias',     i: 'ðŸ”„', a: () => App.UI.Views.renderTransfers() },
-                        ],
-                        pastor: [
-                            { t: 'Dashboard',          i: 'ðŸ“Š', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'MembresÃ­a',          i: 'ðŸ‘¥', a: () => App.UI.Views.renderMembers() },
-                            { t: 'Transferencias',     i: 'ðŸ”„', a: () => App.UI.Views.renderTransfers() },
-                            { t: 'Nueva Sede',         i: 'â›ª', a: () => App.UI.Modals.openSedeRegistration() },
-                        ],
-                        sede: [
-                            { t: 'Dashboard',              i: 'ðŸ“Š', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'Mi MembresÃ­a',           i: 'ðŸ‘¥', a: () => App.UI.Views.renderMembers() },
-                            { t: 'Peticiones de Traslado', i: 'ðŸ“¤', a: () => App.UI.Views.renderTransferRequests() },
-                        ]
-                    };
-
-                    const items = menus[rol] || menus.sede;
-                    items.forEach((item, index) => {
-                        const btn = document.createElement('button');
-                        btn.className = "w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 rounded-xl font-bold text-[10px] text-slate-300 hover:text-white uppercase tracking-widest transition-all group outline-none text-left";
-                        btn.innerHTML = `<span class="text-lg group-hover:scale-110 transition-transform opacity-70 group-hover:opacity-100">${item.i}</span><span>${item.t}</span>`;
-                        btn.onclick = () => {
-                            Array.from(nav.children).forEach(c => c.classList.remove('bg-white/10', 'text-white'));
-                            btn.classList.add('bg-white/10', 'text-white');
-                            item.a();
-                        };
-                        nav.appendChild(btn);
-                        if (index === 0) btn.classList.add('bg-white/10', 'text-white');
-                    });
-                }
-            },
-
-            Views: {
-                setHeader: function(title, subtitle, actionsHTML = '') {
-                    document.getElementById('viewTitle').innerText = title;
-                    document.getElementById('viewSubtitle').innerText = subtitle;
-                    document.getElementById('headerActions').innerHTML = actionsHTML;
-                },
-                destroyCharts: function() {
-                    App.State.charts.forEach(c => c.destroy());
-                    App.State.charts = [];
-                },
-
-                // ---- DASHBOARD ----
-                renderDashboard: function() {
-                    this.destroyCharts();
-                    App.State.activeView = 'dashboard';
-                    this.setHeader("Centro de Mando", "MÃ©tricas y AnÃ¡lisis", `<button onclick="App.UI.Views.renderDashboard()" class="bg-brand-50 text-brand-700 px-5 py-2.5 rounded-lg font-bold text-[10px] uppercase hover:bg-brand-100">â†» Refrescar</button>`);
-
-                    const area = document.getElementById('contentArea');
-                    let allMembers = App.DB.get(App.Constants.STORAGE_MEMBERS);
-                    const rol = App.State.user.rol;
-
-                    if (rol === 'sede') allMembers = allMembers.filter(m => m.iglesiaId === App.State.user.sedeId);
-                    else if (rol === 'pastor' && App.State.user.iglesiaIds?.length) allMembers = allMembers.filter(m => App.State.user.iglesiaIds.includes(m.iglesiaId));
-
-                    const activos  = allMembers.filter(m => m.estado !== 'Inactivo').length;
-                    const hombres  = allMembers.filter(m => m.genero === 'Masculino').length;
-                    const mujeres  = allMembers.filter(m => m.genero === 'Femenino').length;
-                    const pending  = App.DB.get(App.Constants.STORAGE_TRANSFERS).filter(t => t.tipo === 'peticion' && t.estado === 'pendiente').length;
-
-                    const minCount = {};
-                    allMembers.forEach(m => { minCount[m.cargo] = (minCount[m.cargo] || 0) + 1; });
-                    const topMin = Object.entries(minCount).sort((a, b) => b[1] - a[1]).slice(0, 4);
-
-                    const pendingBadge = (rol !== 'sede' && pending > 0) ? `<span class="ml-auto bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full">${pending} pend.</span>` : '';
-
-                    area.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-brand-600 card-hover">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Total Miembros</p>
-                                <h3 class="text-4xl font-black text-brand-900 mt-2">${allMembers.length}</h3>
-                                <p class="text-[9px] text-emerald-600 font-bold mt-2">â†‘ ${activos} Activos</p>
-                            </div>
-                            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-brand-accent card-hover">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">DivisiÃ³n GÃ©nero</p>
-                                <div class="flex justify-between items-end mt-2">
-                                    <div><span class="text-2xl font-black text-brand-800">${hombres}</span> <span class="text-[9px] text-slate-400 uppercase">H</span></div>
-                                    <div><span class="text-2xl font-black text-brand-accent">${mujeres}</span> <span class="text-[9px] text-slate-400 uppercase">M</span></div>
-                                </div>
-                                <div class="w-full h-1.5 bg-slate-100 rounded-full mt-4 flex overflow-hidden">
-                                    <div style="width:${allMembers.length ? (hombres/allMembers.length)*100 : 50}%" class="bg-brand-800 h-full"></div>
-                                    <div style="width:${allMembers.length ? (mujeres/allMembers.length)*100 : 50}%" class="bg-brand-accent h-full"></div>
-                                </div>
-                            </div>
-                            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-emerald-500 card-hover">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sedes Activas</p>
-                                <h3 class="text-4xl font-black text-brand-900 mt-2">${App.DB.get(App.Constants.STORAGE_CHURCHES).length}</h3>
-                                <p class="text-[9px] text-slate-400 font-bold mt-2 uppercase">Iglesias registradas</p>
-                            </div>
-                            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-amber-400 card-hover cursor-pointer" onclick="App.UI.Views.renderTransfers()">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">Traslados Pendientes ${pendingBadge}</p>
-                                <h3 class="text-4xl font-black text-brand-900 mt-2">${pending}</h3>
-                                <p class="text-[9px] text-amber-600 font-bold mt-2 uppercase">Peticiones por revisar</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div class="glass-panel p-8 rounded-[2.5rem] lg:col-span-2">
-                                <h4 class="text-[11px] font-black uppercase text-brand-900 tracking-widest mb-6 border-b pb-4">Bautismos por Mes (Simulado)</h4>
-                                <canvas id="chartLine" height="100"></canvas>
-                            </div>
-                            <div class="glass-panel p-8 rounded-[2.5rem] bg-gradient-to-br from-brand-800 to-brand-900 text-white">
-                                <h4 class="text-[11px] font-black uppercase text-brand-accent tracking-widest mb-6">ðŸŽ‚ PrÃ³ximos CumpleaÃ±os</h4>
-                                <div class="space-y-3 max-h-[250px] overflow-y-auto pr-2">
-                                    ${allMembers.filter(m => m.nac).sort((a,b) => new Date(a.nac).getMonth()-new Date(b.nac).getMonth()).slice(0,6).map(m => {
-                                        const d = new Date(m.nac + "T00:00:00");
-                                        const isNow = d.getMonth() === new Date().getMonth();
-                                        return `<div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10 ${isNow?'border-brand-accent/50':''}" >
-                                            <img src="${m.foto}" class="w-9 h-9 rounded-full object-cover">
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-[10px] font-bold uppercase truncate">${m.nombre}</p>
-                                                <p class="text-[8px] text-blue-300">${d.toLocaleDateString('es-ES',{month:'short',day:'numeric'})}</p>
-                                            </div>${isNow?'<span>ðŸŽˆ</span>':''}
-                                        </div>`;
-                                    }).join('') || '<p class="text-xs text-white/50 italic">Sin registros.</p>'}
-                                </div>
-                            </div>
-                        </div>`;
-
-                    setTimeout(() => {
-                        const ctx = document.getElementById('chartLine');
-                        if (ctx) App.State.charts.push(new Chart(ctx.getContext('2d'), {
-                            type: 'bar',
-                            data: { labels: ['Ene','Feb','Mar','Abr','May','Jun'], datasets: [{ label: 'Bautismos', data: [2,5,3,8,4,12], backgroundColor: '#004077', borderRadius: 4 }] },
-                            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-                        }));
-                    }, 100);
-                },
-
-                // ---- DIRECTORIO DE MIEMBROS ----
-                renderMembers: function(searchTerm = "") {
-                    this.destroyCharts();
-                    App.State.activeView = 'members';
-                    const rol = App.State.user.rol;
-
-                    let list = App.DB.get(App.Constants.STORAGE_MEMBERS);
-                    if (rol === 'sede') list = list.filter(m => m.iglesiaId === App.State.user.sedeId);
-                    else if (rol === 'pastor' && App.State.user.iglesiaIds?.length) list = list.filter(m => App.State.user.iglesiaIds.includes(m.iglesiaId));
-                    if (searchTerm) {
-                        const q = searchTerm.toLowerCase();
-                        list = list.filter(m => m.nombre.toLowerCase().includes(q) || (m.dni && m.dni.includes(q)));
-                    }
-                    App.State.currentList = list;
-
-                    const canAddMember = ['superadmin', 'pastor', 'sede'].includes(rol);
-
-                    this.setHeader(
-                        rol === 'sede' ? "Mi MembresÃ­a Local" : "Directorio Global",
-                        "GestiÃ³n de Perfiles",
-                        `<div class="relative">
-                            <span class="absolute left-3 top-2.5 text-slate-400">ðŸ”</span>
-                            <input type="text" id="searchInput" placeholder="Buscar por nombre o DNI..." value="${searchTerm}"
-                                onchange="App.UI.Views.renderMembers(this.value)"
-                                class="pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-[10px] font-bold outline-none focus:border-brand-600 w-64 bg-slate-50">
-                        </div>
-                        <button onclick="App.Members.exportCSV()" class="bg-emerald-50 text-emerald-600 px-5 py-2.5 rounded-xl font-black text-[9px] uppercase hover:bg-emerald-100 border border-emerald-100">CSV</button>
-                        ${canAddMember ? `<button onclick="App.UI.Modals.openMemberEditor()" class="bg-brand-accent text-white px-6 py-2.5 rounded-xl font-black text-[9px] uppercase shadow-lg hover:bg-brand-accentHover flex items-center gap-2">+ Nuevo Miembro</button>` : ''}`
-                    );
-
-                    const area = document.getElementById('contentArea');
-                    area.innerHTML = `
-                        <div class="glass-panel rounded-[2rem] overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left whitespace-nowrap">
-                                    <thead class="bg-slate-50 uppercase text-slate-400 text-[9px] font-black tracking-widest border-b border-slate-100">
-                                        <tr>
-                                            <th class="px-8 py-5">Perfil</th>
-                                            <th class="px-8 py-5">Documento</th>
-                                            <th class="px-8 py-5">Ministerio</th>
-                                            <th class="px-8 py-5">Estado</th>
-                                            <th class="px-8 py-5 text-right">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-50 text-slate-700">
-                                        ${list.map(obj => `
-                                            <tr class="hover:bg-slate-50/50 transition-colors group">
-                                                <td class="px-8 py-4">
-                                                    <div class="flex items-center gap-4">
-                                                        <img src="${obj.foto}" class="w-10 h-10 rounded-full object-cover shadow-sm ring-2 ring-white">
-                                                        <div>
-                                                            <p class="font-black text-[11px] uppercase text-brand-900">${obj.nombre}</p>
-                                                            <p class="text-[8px] text-brand-600 font-bold mt-0.5 uppercase">ðŸ“ ${obj.iglesiaNombre}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-4">
-                                                    <p class="font-bold text-[10px] tracking-widest">${obj.dni || 'S/N'}</p>
-                                                    <p class="text-[8px] text-slate-400 mt-0.5">${obj.celular || 'Sin tel.'}</p>
-                                                </td>
-                                                <td class="px-8 py-4">
-                                                    <span class="bg-brand-50 text-brand-700 px-3 py-1 rounded-md font-black text-[8px] uppercase border border-brand-100/50">${obj.cargo || 'Miembro'}</span>
-                                                </td>
-                                                <td class="px-8 py-4">
-                                                    ${obj.estado === 'Inactivo'
-                                                        ? `<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-[8px] font-bold uppercase flex items-center gap-1 w-max"><div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>Inactivo</span>`
-                                                        : `<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[8px] font-bold uppercase flex items-center gap-1 w-max"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>Activo</span>`}
-                                                </td>
-                                                <td class="px-8 py-4 text-right">
-                                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button title="Ver Credencial" onclick="App.UI.Modals.viewCredential(${obj.id})" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">ðŸ‘</button>
-                                                        ${['superadmin','pastor','sede'].includes(rol) ? `<button title="Editar" onclick="App.UI.Modals.openMemberEditor(${obj.id})" class="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition-colors">âœï¸</button>` : ''}
-                                                        ${rol === 'sede' ? `<button title="Solicitar Traslado" onclick="App.UI.Modals.openTransferRequestModal(${obj.id})" class="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-colors">ðŸ“¤</button>` : ''}
-                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Transferir" onclick="App.UI.Modals.openTransferModal(${obj.id})" class="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-colors">ðŸ”„</button>` : ''}
-                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Eliminar" onclick="App.Members.delete(${obj.id})" class="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">ðŸ—‘</button>` : ''}
-                                                    </div>
-                                                </td>
-                                            </tr>`).join('') || `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-400 font-bold text-[11px] uppercase">No se encontraron registros</td></tr>`}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="px-8 py-4 bg-slate-50 border-t border-slate-100 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                Mostrando ${list.length} registros
-                            </div>
-                        </div>`;
-                },
-
-                // ---- GESTIÃ“N DE SEDES (superadmin) ----
-                renderChurches: function() {
-                    this.destroyCharts();
-                    App.State.activeView = 'churches';
-                    this.setHeader("GestiÃ³n de Sedes", "AdministraciÃ³n de Iglesias Locales",
-                        `<button onclick="App.UI.Modals.openSedeRegistration()" class="bg-brand-700 text-white px-6 py-2.5 rounded-xl font-black text-[9px] uppercase shadow-lg hover:bg-brand-800">+ Nueva Sede</button>`);
-
-                    let list      = App.DB.get(App.Constants.STORAGE_CHURCHES);
-                    if (App.State.user.rol === 'pastor' && App.State.user.iglesiaIds?.length)
-                        list = list.filter(c => App.State.user.iglesiaIds.includes(c.id));
-                    const members = App.DB.get(App.Constants.STORAGE_MEMBERS);
-                    const area    = document.getElementById('contentArea');
-
-                    area.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            ${list.map(c => {
-                                const count = members.filter(m => m.iglesiaId === c.id).length;
-                                return `<div class="glass-panel p-8 rounded-[2rem] relative group overflow-hidden">
-                                    <div class="absolute top-0 left-0 w-full h-2 bg-brand-accent transform -translate-y-full group-hover:translate-y-0 transition-transform"></div>
-                                    <div class="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center text-2xl mb-5">â›ª</div>
-                                    <h4 class="font-black text-xs uppercase text-brand-900 tracking-tight leading-tight">${c.nombre}</h4>
-                                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-widest">${c.distrito || 'Sin Distrito'}</p>
-                                    <div class="mt-6 flex justify-between items-center border-t border-slate-100 pt-4">
-                                        <span class="text-[10px] font-black text-brand-600">ðŸ‘¥ ${count} Miembros</span>
-                                        <button onclick="App.UI.Modals.deleteSede('${c.id}')" class="text-[9px] font-black uppercase text-slate-300 hover:text-red-500 transition-colors">Eliminar</button>
-                                    </div>
-                                </div>`;
-                            }).join('')}
-                        </div>`;
-                },
-
-                // ---- GESTIÃ“N DE USUARIOS (superadmin) ----
-                renderUsers: function() {
-                    this.destroyCharts();
-                    App.State.activeView = 'users';
-                    this.setHeader("GestiÃ³n de Usuarios", "Control de Accesos y Roles",
-                        `<button onclick="App.UI.Modals.openUserEditor()" class="bg-brand-accent text-white px-6 py-2.5 rounded-xl font-black text-[9px] uppercase shadow-lg hover:bg-brand-accentHover">+ Nuevo Usuario</button>`);
-
-                    const users   = App.DB.get(App.Constants.STORAGE_USERS);
-                    const churches = App.DB.get(App.Constants.STORAGE_CHURCHES);
-                    const area    = document.getElementById('contentArea');
-                    const roleLabels = App.Auth.ROLES;
-
-                    area.innerHTML = `
-                        <div class="glass-panel rounded-[2rem] overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left whitespace-nowrap">
-                                    <thead class="bg-slate-50 uppercase text-slate-400 text-[9px] font-black tracking-widest border-b border-slate-100">
-                                        <tr>
-                                            <th class="px-8 py-5">Usuario</th>
-                                            <th class="px-8 py-5">Rol</th>
-                                            <th class="px-8 py-5">Sede Asignada</th>
-                                            <th class="px-8 py-5 text-right">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-50">
-                                        ${users.map(u => {
-                                            const ch = churches.find(c => c.id === u.iglesiaId);
-                                            const rInfo = roleLabels[u.rol] || { label: u.rol };
-                                            const badgeCls = u.rol === 'superadmin' ? 'bg-amber-100 text-amber-700' : u.rol === 'pastor' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700';
-                                            return `<tr class="hover:bg-slate-50/50 transition-colors group">
-                                                <td class="px-8 py-4">
-                                                    <p class="font-black text-[11px] uppercase text-brand-900">${u.nombre}</p>
-                                                    <p class="text-[9px] text-slate-400 mt-0.5">${u.email}</p>
-                                                </td>
-                                                <td class="px-8 py-4">
-                                                    <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase ${badgeCls}">${rInfo.label}</span>
-                                                </td>
-                                                <td class="px-8 py-4 text-[10px] font-bold text-slate-600">
-                                                    ${u.rol === 'pastor' && u.iglesiaIds?.length
-                                                        ? u.iglesiaIds.map(id => { const c = churches.find(x => x.id === id); return c ? `<span class="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[8px] font-black uppercase mr-1 mb-1">${c.distrito || c.nombre.split(' - ')[1] || c.nombre}</span>` : ''; }).join('')
-                                                        : u.iglesiaId === 'global' ? 'Acceso Global' : (ch ? ch.nombre : u.iglesiaId)}
-                                                </td>
-                                                <td class="px-8 py-4 text-right">
-                                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onclick="App.UI.Modals.openUserEditor('${u.id}')" class="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition-colors">âœï¸</button>
-                                                        ${u.rol !== 'superadmin' ? `<button onclick="App.Users.delete('${u.id}')" class="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">ðŸ—‘</button>` : ''}
-                                                    </div>
-                                                </td>
-                                            </tr>`;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>`;
-                },
-
-                // ---- TRANSFERENCIAS (superadmin / pastor) ----
-                renderTransfers: function() {
-                    this.destroyCharts();
-                    App.State.activeView = 'transfers';
-                    this.setHeader("Transferencias", "GestiÃ³n de Traslados entre Sedes", '');
-
-                    let transfers = App.DB.get(App.Constants.STORAGE_TRANSFERS);
-                    if (App.State.user.rol === 'pastor' && App.State.user.iglesiaIds?.length)
-                        transfers = transfers.filter(t => App.State.user.iglesiaIds.includes(t.origenId) || App.State.user.iglesiaIds.includes(t.destinoId));
-                    const pending   = transfers.filter(t => t.tipo === 'peticion' && t.estado === 'pendiente');
-                    const history   = transfers.filter(t => t.estado !== 'pendiente');
-                    const area      = document.getElementById('contentArea');
-
-                    area.innerHTML = `
-                        ${pending.length > 0 ? `
-                        <div class="mb-8">
-                            <h3 class="text-[11px] font-black uppercase text-amber-600 tracking-widest mb-4 flex items-center gap-2">
-                                ðŸ”” Peticiones Pendientes <span class="bg-amber-500 text-white text-[8px] px-2 py-0.5 rounded-full">${pending.length}</span>
-                            </h3>
-                            <div class="space-y-3">
-                                ${pending.map(t => `
-                                    <div class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-l-4 border-amber-400">
-                                        <div>
-                                            <p class="font-black text-[12px] uppercase text-brand-900">${t.memberNombre}</p>
-                                            <p class="text-[10px] text-slate-500 mt-1">ðŸ“¤ <b>${t.origenNombre}</b> â†’ <b>${t.destinoNombre}</b></p>
-                                            <p class="text-[9px] text-slate-400 mt-0.5">Solicitado por: ${t.solicitadoPorNombre} Â· ${t.fecha}</p>
-                                        </div>
-                                        <div class="flex gap-3 flex-shrink-0">
-                                            <button onclick="App.Transfers.approvePetition('${t.id}')" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase hover:bg-emerald-700 transition-all">âœ… Aprobar</button>
-                                            <button onclick="App.Transfers.rejectPetition('${t.id}')" class="bg-red-50 text-red-600 px-5 py-2.5 rounded-xl font-black text-[9px] uppercase hover:bg-red-600 hover:text-white transition-all border border-red-100">âŒ Rechazar</button>
-                                        </div>
-                                    </div>`).join('')}
-                            </div>
-                        </div>` : `<div class="glass-panel p-6 rounded-2xl mb-8 text-center text-slate-400 font-bold text-[11px] uppercase tracking-widest">âœ… Sin peticiones pendientes</div>`}
-
-                        <h3 class="text-[11px] font-black uppercase text-slate-400 tracking-widest mb-4">Historial de Traslados</h3>
-                        <div class="glass-panel rounded-[2rem] overflow-hidden">
-                            <table class="w-full text-left whitespace-nowrap">
-                                <thead class="bg-slate-50 uppercase text-slate-400 text-[9px] font-black tracking-widest border-b border-slate-100">
-                                    <tr>
-                                        <th class="px-8 py-5">Miembro</th>
-                                        <th class="px-8 py-5">Origen</th>
-                                        <th class="px-8 py-5">Destino</th>
-                                        <th class="px-8 py-5">Fecha</th>
-                                        <th class="px-8 py-5">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50">
-                                    ${history.length ? history.slice().reverse().map(t => `
-                                        <tr class="hover:bg-slate-50/50">
-                                            <td class="px-8 py-4 font-black text-[11px] text-brand-900 uppercase">${t.memberNombre}</td>
-                                            <td class="px-8 py-4 text-[10px] text-slate-500">${t.origenNombre}</td>
-                                            <td class="px-8 py-4 text-[10px] text-slate-500">${t.destinoNombre}</td>
-                                            <td class="px-8 py-4 text-[10px] font-bold">${t.fecha}</td>
-                                            <td class="px-8 py-4">
-                                                ${t.estado === 'completado' ? '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[8px] font-black uppercase">Completado</span>'
-                                                : t.estado === 'aprobado'   ? '<span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[8px] font-black uppercase">Aprobado</span>'
-                                                : '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-[8px] font-black uppercase">Rechazado</span>'}
-                                            </td>
-                                        </tr>`).join('')
-                                    : `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-400 font-bold text-[11px] uppercase">Sin historial de traslados</td></tr>`}
-                                </tbody>
-                            </table>
-                        </div>`;
-                },
-
-                // ---- PETICIONES DE TRASLADO (sede) ----
-                renderTransferRequests: function() {
-                    this.destroyCharts();
-                    App.State.activeView = 'transfer-requests';
-                    this.setHeader("Peticiones de Traslado", "Solicitudes enviadas desde esta sede", '');
-
-                    const myTransfers = App.DB.get(App.Constants.STORAGE_TRANSFERS)
-                        .filter(t => t.origenId === App.State.user.sedeId);
-                    const area = document.getElementById('contentArea');
-
-                    area.innerHTML = `
-                        <div class="glass-panel rounded-[2rem] overflow-hidden">
-                            <table class="w-full text-left whitespace-nowrap">
-                                <thead class="bg-slate-50 uppercase text-slate-400 text-[9px] font-black tracking-widest border-b border-slate-100">
-                                    <tr>
-                                        <th class="px-8 py-5">Miembro</th>
-                                        <th class="px-8 py-5">Destino Solicitado</th>
-                                        <th class="px-8 py-5">Fecha</th>
-                                        <th class="px-8 py-5">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50">
-                                    ${myTransfers.length ? myTransfers.slice().reverse().map(t => `
-                                        <tr class="hover:bg-slate-50/50">
-                                            <td class="px-8 py-4 font-black text-[11px] text-brand-900 uppercase">${t.memberNombre}</td>
-                                            <td class="px-8 py-4 text-[10px] text-slate-500">${t.destinoNombre}</td>
-                                            <td class="px-8 py-4 text-[10px] font-bold">${t.fecha}</td>
-                                            <td class="px-8 py-4">
-                                                ${t.estado === 'pendiente'   ? '<span class="bg-amber-50 text-amber-600 px-2 py-1 rounded text-[8px] font-black uppercase">â³ Pendiente</span>'
-                                                : t.estado === 'aprobado'   ? '<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[8px] font-black uppercase">âœ… Aprobado</span>'
-                                                : '<span class="bg-red-50 text-red-600 px-2 py-1 rounded text-[8px] font-black uppercase">âŒ Rechazado</span>'}
-                                            </td>
-                                        </tr>`).join('')
-                                    : `<tr><td colspan="4" class="px-8 py-10 text-center text-slate-400 font-bold text-[11px] uppercase">No hay peticiones enviadas aÃºn</td></tr>`}
-                                </tbody>
-                            </table>
-                        </div>`;
-                }
-            },
-
-            // ===================== MODALS =====================
-            Modals: {
-                open: function() {
-                    const m = document.getElementById('modalGlobal'), c = document.getElementById('modalContainer');
-                    m.classList.remove('hidden');
-                    setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10);
-                },
-                close: function() {
-                    const m = document.getElementById('modalGlobal'), c = document.getElementById('modalContainer');
-                    m.classList.add('opacity-0'); c.classList.add('scale-95');
-                    setTimeout(() => m.classList.add('hidden'), 300);
-                },
-                switchTab: function(tabId) {
-                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-                    document.getElementById(tabId).classList.add('active');
-                    document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
-                },
-
-                // ---- EDITAR/CREAR MIEMBRO ----
-                openMemberEditor: function(id = null) {
-                    const m = id ? App.DB.get(App.Constants.STORAGE_MEMBERS).find(x => x.id === id) : null;
-                    App.State.tempImage = m ? m.foto : "";
-                    document.getElementById('modalTitle').innerText = id ? 'Editar Ficha de Miembro' : 'Nuevo Miembro';
-
-                    const churches = App.DB.get(App.Constants.STORAGE_CHURCHES);
-                    const rol = App.State.user.rol;
-                    const churchOptions = rol === 'sede'
-                        ? `<option value="${App.State.user.sedeId}" selected>${App.State.user.sedeNombre}</option>`
-                        : churches.map(c => `<option value="${c.id}" ${m && m.iglesiaId === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('');
-
-                    const tipoDoc = m ? (m.tipoDoc || 'DNI') : 'DNI';
-                    const isExt = tipoDoc !== 'DNI';
-                    const deptos = Object.keys(App.PERU_UBIGEO).sort();
-                    const dOpts = deptos.map(d => `<option value="${d}">${d}</option>`).join('');
-
-                    document.getElementById('modalContent').innerHTML = `
-                        <div class="flex border-b border-slate-200 mb-5 gap-1 overflow-x-auto">
-                            <button class="tab-btn active pb-3 px-4 text-[10px] uppercase font-black text-slate-400 tracking-widest whitespace-nowrap" data-target="tab1" onclick="App.UI.Modals.switchTab('tab1')">ðŸ‘¤ Datos Personales</button>
-                            <button class="tab-btn pb-3 px-4 text-[10px] uppercase font-black text-slate-400 tracking-widest whitespace-nowrap" data-target="tab2" onclick="App.UI.Modals.switchTab('tab2')">ðŸ“ Nacimiento y Domicilio</button>
-                            <button class="tab-btn pb-3 px-4 text-[10px] uppercase font-black text-slate-400 tracking-widest whitespace-nowrap" data-target="tab3" onclick="App.UI.Modals.switchTab('tab3')">â›ª FeligresÃ­a</button>
-                        </div>
-                        <form onsubmit="event.preventDefault(); App.Members.save(${id});" class="space-y-5">
-
-                            <!-- TAB 1 -->
-                            <div id="tab1" class="tab-content active space-y-5">
-                                <div class="flex flex-col md:flex-row gap-6 items-start">
-                                    <div class="flex flex-col items-center gap-2 flex-shrink-0">
-                                        <div class="w-28 h-28 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 overflow-hidden relative group">
-                                            <img id="previewImg" src="${App.State.tempImage || 'https://ui-avatars.com/api/?name=AM&background=f1f5f9&color=cbd5e1&size=200'}" class="w-full h-full object-cover">
-                                            <label class="absolute inset-0 bg-brand-900/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer">
-                                                <span class="text-xl">ðŸ“·</span><span class="text-[8px] font-black uppercase">Cambiar</span>
-                                                <input type="file" accept="image/jpeg,image/png" class="hidden" onchange="App.Members.processImage(this)">
-                                            </label>
-                                        </div>
-                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Foto Oficial</span>
-                                    </div>
-                                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                                        <div class="space-y-1 md:col-span-2">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Apellido Paterno *</label>
-                                            <input type="text" id="frmApPat" value="${m ? (m.apellidoPaterno||'') : ''}" required class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold text-slate-800 uppercase" placeholder="Apellido paterno">
-                                        </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Apellido Materno *</label>
-                                            <input type="text" id="frmApMat" value="${m ? (m.apellidoMaterno||'') : ''}" required class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold text-slate-800 uppercase" placeholder="Apellido materno">
-                                        </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Nombres *</label>
-                                            <input type="text" id="frmNombres" value="${m ? (m.nombres||'') : ''}" required class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold text-slate-800 uppercase" placeholder="Nombres completos">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-500 uppercase ml-1 tracking-widest">Tipo Documento *</label>
-                                        <select id="frmTipoDoc" onchange="App.UI.Modals.toggleDocType()" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="DNI" ${tipoDoc==='DNI'?'selected':''}>DNI</option>
-                                            <option value="CÃ©dula" ${tipoDoc==='CÃ©dula'?'selected':''}>CÃ©dula</option>
-                                            <option value="C.E" ${tipoDoc==='C.E'?'selected':''}>C.E (Carnet ExtranjerÃ­a)</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1 md:col-span-2">
-                                        <label class="text-[9px] font-black text-slate-500 uppercase ml-1 tracking-widest">NÃºmero de Documento *</label>
-                                        <input type="text" id="frmNumDoc" value="${m ? (m.numDoc||m.dni||'') : ''}" required class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="NÃºmero de documento">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Sexo *</label>
-                                        <select id="frmSexo" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="Masculino" ${(m?.sexo||m?.genero)==='Masculino'?'selected':''}>Masculino</option>
-                                            <option value="Femenino" ${(m?.sexo||m?.genero)==='Femenino'?'selected':''}>Femenino</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Estado Civil</label>
-                                        <select id="frmEstCivil" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="Soltero/a" ${m?.estadoCivil==='Soltero/a'?'selected':''}>Soltero/a</option>
-                                            <option value="Casado/a" ${m?.estadoCivil==='Casado/a'?'selected':''}>Casado/a</option>
-                                            <option value="Viudo/a" ${m?.estadoCivil==='Viudo/a'?'selected':''}>Viudo/a</option>
-                                            <option value="Divorciado/a" ${m?.estadoCivil==='Divorciado/a'?'selected':''}>Divorciado/a</option>
-                                            <option value="Conviviente" ${m?.estadoCivil==='Conviviente'?'selected':''}>Conviviente</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Celular</label>
-                                        <input type="tel" id="frmCel" value="${m ? (m.celular||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="999 999 999">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Grado de InstrucciÃ³n</label>
-                                        <select id="frmGradoInst" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="">Seleccionar...</option>
-                                            <option value="Sin instrucciÃ³n" ${m?.gradoInstruccion==='Sin instrucciÃ³n'?'selected':''}>Sin instrucciÃ³n</option>
-                                            <option value="Primaria" ${m?.gradoInstruccion==='Primaria'?'selected':''}>Primaria</option>
-                                            <option value="Secundaria" ${m?.gradoInstruccion==='Secundaria'?'selected':''}>Secundaria</option>
-                                            <option value="TÃ©cnico" ${m?.gradoInstruccion==='TÃ©cnico'?'selected':''}>TÃ©cnico</option>
-                                            <option value="Superior / Universitario" ${m?.gradoInstruccion==='Superior / Universitario'?'selected':''}>Superior / Universitario</option>
-                                            <option value="Posgrado" ${m?.gradoInstruccion==='Posgrado'?'selected':''}>Posgrado</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1 md:col-span-2">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">OcupaciÃ³n</label>
-                                        <input type="text" id="frmOcupacion" value="${m ? (m.ocupacion||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="ProfesiÃ³n u oficio">
-                                    </div>
-                                </div>
-                                <div class="pt-4 border-t border-slate-100 flex justify-end">
-                                    <button type="button" onclick="App.UI.Modals.switchTab('tab2')" class="bg-brand-50 text-brand-700 px-6 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-brand-100">Siguiente â€º</button>
-                                </div>
-                            </div>
-
-                            <!-- TAB 2 -->
-                            <div id="tab2" class="tab-content space-y-6">
-                                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200">
-                                    <p class="text-[10px] font-black text-brand-700 uppercase tracking-widest mb-4">ðŸŽ‚ Datos de Nacimiento</p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha de Nacimiento</label>
-                                            <input type="date" id="frmFechaNac" value="${m ? (m.fechaNac||m.nac||'') : ''}" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold">
-                                        </div>
-                                        <div id="nacDeptoWrap" class="${isExt?'hidden':''} space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Departamento Nac.</label>
-                                            <select id="nacDepto" onchange="App.UI.Modals.updateUbigeo('nac')" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">Seleccionar...</option>${dOpts}
-                                            </select>
-                                        </div>
-                                        <div id="nacProvWrap" class="${isExt?'hidden':''} space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Provincia Nac.</label>
-                                            <select id="nacProv" onchange="App.UI.Modals.updateUbigeo('nac','prov')" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">â€” Seleccionar depto. â€”</option>
-                                            </select>
-                                        </div>
-                                        <div id="nacDistWrap" class="${isExt?'hidden':''} space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Distrito Nac.</label>
-                                            <select id="nacDist" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">â€” Seleccionar prov. â€”</option>
-                                            </select>
-                                        </div>
-                                        <div id="nacLibreWrap" class="${isExt?'':'hidden'} space-y-1 md:col-span-2">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Lugar de Nacimiento (PaÃ­s / Ciudad)</label>
-                                            <input type="text" id="frmNacLibre" value="${m ? (m.nacLugarLibre||'') : ''}" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="Ej: Colombia, BogotÃ¡">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200">
-                                    <p class="text-[10px] font-black text-brand-700 uppercase tracking-widest mb-4">ðŸ  Domicilio Actual</p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="space-y-1 md:col-span-2">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">DirecciÃ³n</label>
-                                            <input type="text" id="frmDomDir" value="${m ? (m.domDireccion||'') : ''}" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="Jr. / Av. / Calle, NÂº">
-                                        </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Departamento</label>
-                                            <select id="domDepto" onchange="App.UI.Modals.updateUbigeo('dom')" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">Seleccionar...</option>${dOpts}
-                                            </select>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Provincia</label>
-                                            <select id="domProv" onchange="App.UI.Modals.updateUbigeo('dom','prov')" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">â€” Seleccionar depto. â€”</option>
-                                            </select>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Distrito</label>
-                                            <select id="domDist" class="w-full p-3.5 bg-white rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                                <option value="">â€” Seleccionar prov. â€”</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="pt-4 border-t border-slate-100 flex justify-between">
-                                    <button type="button" onclick="App.UI.Modals.switchTab('tab1')" class="text-slate-400 px-4 py-3 font-bold text-[10px] uppercase hover:text-slate-600">â€¹ Volver</button>
-                                    <button type="button" onclick="App.UI.Modals.switchTab('tab3')" class="bg-brand-50 text-brand-700 px-6 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-brand-100">Siguiente â€º</button>
-                                </div>
-                            </div>
-
-                            <!-- TAB 3 -->
-                            <div id="tab3" class="tab-content space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Procedencia Religiosa</label>
-                                        <input type="text" id="frmProcedencia" value="${m ? (m.procedenciaReligiosa||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="Ej: Adventista, EvangÃ©lico, CatÃ³lico...">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">CondiciÃ³n</label>
-                                        <select id="frmCondicion" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="MI" ${m?.condicion==='MI'||!m?'selected':''}>MI â€” Miembro de Iglesia</option>
-                                            <option value="MES" ${m?.condicion==='MES'?'selected':''}>MES â€” Miembro en SimpatÃ­a</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Fecha de Bautismo</label>
-                                        <input type="date" id="frmBau" value="${m ? (m.bautismo||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Pastor que lo BautizÃ³</label>
-                                        <input type="text" id="frmPastorBau" value="${m ? (m.pastorBautizo||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="Nombre del pastor">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Cargo / Ministerio</label>
-                                        <input type="text" id="frmCar" value="${m ? (m.cargo||'') : ''}" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold" placeholder="Anciano, DiÃ¡cono, MÃºsica...">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Sede</label>
-                                        <select id="frmIglesia" ${rol==='sede'?'disabled':''} class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">${churchOptions}</select>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Estado</label>
-                                        <select id="frmEst" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-brand-500 outline-none font-bold appearance-none">
-                                            <option value="Activo" ${m?.estado==='Activo'||!m?'selected':''}>Activo</option>
-                                            <option value="Inactivo" ${m?.estado==='Inactivo'?'selected':''}>Inactivo</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="pt-6 border-t border-slate-100 flex justify-between">
-                                    <button type="button" onclick="App.UI.Modals.switchTab('tab2')" class="text-slate-400 px-4 py-3 font-bold text-[10px] uppercase hover:text-slate-600">â€¹ Volver</button>
-                                    <button type="submit" class="bg-brand-accent text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-brand-accentHover flex items-center gap-2">ðŸ’¾ Guardar Ficha</button>
-                                </div>
-                            </div>
-                        </form>`;
-                    this.open();
-                    if (m) {
-                        if (m.nacDepartamento) {
-                            document.getElementById('nacDepto').value = m.nacDepartamento;
-                            App.UI.Modals.updateUbigeo('nac');
-                            setTimeout(() => {
-                                if (m.nacProvincia) { document.getElementById('nacProv').value = m.nacProvincia; App.UI.Modals.updateUbigeo('nac','prov'); }
-                                setTimeout(() => { if (m.nacDistrito) document.getElementById('nacDist').value = m.nacDistrito; }, 60);
-                            }, 60);
-                        }
-                        if (m.domDepartamento) {
-                            document.getElementById('domDepto').value = m.domDepartamento;
-                            App.UI.Modals.updateUbigeo('dom');
-                            setTimeout(() => {
-                                if (m.domProvincia) { document.getElementById('domProv').value = m.domProvincia; App.UI.Modals.updateUbigeo('dom','prov'); }
-                                setTimeout(() => { if (m.domDistrito) document.getElementById('domDist').value = m.domDistrito; }, 60);
-                            }, 60);
-                        }
-                    }
-                },
-                toggleDocType: function() {
-                    const isExt = document.getElementById('frmTipoDoc')?.value !== 'DNI';
-                    ['nacDeptoWrap','nacProvWrap','nacDistWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', isExt); });
-                    const libre = document.getElementById('nacLibreWrap');
-                    if (libre) libre.classList.toggle('hidden', !isExt);
-                },
-                updateUbigeo: function(prefix, level='depto') {
-                    const depto = document.getElementById(prefix+'Depto')?.value;
-                    const provSel = document.getElementById(prefix+'Prov');
-                    const distSel = document.getElementById(prefix+'Dist');
-                    if (level === 'depto') {
-                        const provs = depto && App.PERU_UBIGEO[depto] ? Object.keys(App.PERU_UBIGEO[depto]).sort() : [];
-                        if (provSel) provSel.innerHTML = '<option value="">Seleccionar...</option>' + provs.map(p=>`<option value="${p}">${p}</option>`).join('');
-                        if (distSel) distSel.innerHTML = '<option value="">â€” Seleccionar prov. â€”</option>';
-                    } else {
-                        const prov = provSel?.value;
-                        const dists = depto && prov && App.PERU_UBIGEO[depto]?.[prov] ? App.PERU_UBIGEO[depto][prov] : [];
-                        if (distSel) distSel.innerHTML = '<option value="">Seleccionar...</option>' + dists.map(d=>`<option value="${d}">${d}</option>`).join('');
-                    }
-                },
-
-                // ---- CREDENCIAL ----
-                viewCredential: function(id) {
-                    const m = App.DB.get(App.Constants.STORAGE_MEMBERS).find(x => x.id === id);
-                    document.getElementById('modalTitle').innerText = 'Ficha Oficial del Miembro';
-                    const lugarNac = (m.tipoDoc && m.tipoDoc !== 'DNI')
-                        ? (m.nacLugarLibre || 'â€”')
-                        : [m.nacDistrito, m.nacProvincia, m.nacDepartamento].filter(Boolean).join(', ') || (m.nac ? '' : 'â€”');
-                    const domicilio = [m.domDireccion, m.domDistrito, m.domProvincia, m.domDepartamento].filter(Boolean).join(' â€” ') || 'â€”';
-                    const sedeCorta = (m.iglesiaNombre||'').replace('Iglesia Adventista del SÃ©ptimo DÃ­a Movimiento de Reforma - ','').replace('Iglesia Adventista del SÃ©ptimo DÃ­a Movimiento de Reforma','IASD Mov. Reforma');
-                    const campos = [
-                        ['Sexo', m.sexo||m.genero], ['Estado Civil', m.estadoCivil],
-                        ['F. Nacimiento', m.fechaNac||m.nac], ['Lugar Nac.', lugarNac],
-                        ['Celular', m.celular], ['InstrucciÃ³n', m.gradoInstruccion],
-                        ['OcupaciÃ³n', m.ocupacion], ['CondiciÃ³n', m.condicion === 'MES' ? 'MES â€” SimpatÃ­a' : 'MI â€” Miembro'],
-                        ['Proc. Religiosa', m.procedenciaReligiosa], ['F. Bautismo', m.bautismo],
-                        ['Pastor BautizÃ³', m.pastorBautizo], ['Domicilio', domicilio],
-                    ];
-                    document.getElementById('modalContent').innerHTML = `
-                        <div class="flex flex-col lg:flex-row gap-8">
-                            <div id="capturePDF" class="flex-1 min-w-0" style="background:#fff;border-radius:20px;border:1px solid #e2e8f0;overflow:hidden;font-family:'Inter',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
-                                <div style="background:linear-gradient(135deg,#001d36 0%,#004077 100%);padding:20px 24px;display:flex;align-items:center;gap:14px;">
-                                    <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" style="width:40px;height:40px;object-fit:contain;opacity:0.9;flex-shrink:0;">
-                                    <div style="flex:1;min-width:0;">
-                                        <p style="color:rgba(255,255,255,0.45);font-size:6.5px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:2px;">AsociaciÃ³n Misionera Internacional</p>
-                                        <p style="color:#fff;font-size:8.5px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;line-height:1.4;">Iglesia Adventista del 7mo DÃ­a, Mov. de Reforma<br><span style="color:#F05A28;">UniÃ³n Peruana â€” MisiÃ³n Oriente</span></p>
-                                    </div>
-                                    <div style="text-align:right;flex-shrink:0;">
-                                        <p style="color:rgba(255,255,255,0.25);font-size:6px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">NÂ° Ficha</p>
-                                        <p style="color:rgba(255,255,255,0.6);font-size:8px;font-weight:900;font-family:monospace;">${String(m.id).slice(-8)}</p>
-                                    </div>
-                                </div>
-                                <div style="padding:20px 24px;display:flex;gap:18px;align-items:flex-start;border-bottom:2px solid #f1f5f9;">
-                                    <div style="text-align:center;flex-shrink:0;">
-                                        <img src="${m.foto}" style="width:88px;height:88px;border-radius:14px;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,0.14);">
-                                        <div id="qrcode" style="margin-top:8px;display:flex;justify-content:center;"></div>
-                                    </div>
-                                    <div style="flex:1;min-width:0;">
-                                        <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;background:${m.condicion==='MES'?'#fef3c7':'#eff6ff'};border:1px solid ${m.condicion==='MES'?'#fde68a':'#bfdbfe'};margin-bottom:6px;">
-                                            <span style="font-size:6.5px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:${m.condicion==='MES'?'#92400e':'#1e40af'};">${m.condicion==='MES'?'Miembro en SimpatÃ­a':'Miembro de Iglesia'}</span>
-                                        </div>
-                                        <h3 style="font-size:14px;font-weight:900;color:#001d36;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.2;margin-bottom:5px;">${m.nombre}</h3>
-                                        <p style="font-size:7.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">ðŸ“ ${sedeCorta}</p>
-                                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                                            <span style="background:${m.estado==='Activo'?'#dcfce7':'#fee2e2'};color:${m.estado==='Activo'?'#15803d':'#dc2626'};padding:3px 10px;border-radius:100px;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;border:1px solid ${m.estado==='Activo'?'#bbf7d0':'#fecaca'};">${m.estado}</span>
-                                            <span style="background:#eff6ff;color:#1d4ed8;padding:3px 10px;border-radius:6px;font-size:7px;font-weight:900;text-transform:uppercase;">${m.tipoDoc||'DNI'}: ${m.numDoc||m.dni||'â€”'}</span>
-                                            ${m.cargo?`<span style="background:#fff7ed;color:#c2410c;padding:3px 10px;border-radius:6px;font-size:7px;font-weight:900;text-transform:uppercase;">${m.cargo}</span>`:''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;">
-                                    ${campos.map(([label,val],i)=>`
-                                    <div style="padding:9px 14px;background:${i%4<2?'#f8fafc':'#fff'};border-bottom:1px solid #f1f5f9;${i%2===0?'border-right:1px solid #f1f5f9;':''}">
-                                        <p style="font-size:6.5px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:2px;">${label}</p>
-                                        <p style="font-size:8.5px;font-weight:700;color:#1e293b;line-height:1.3;">${val||'â€”'}</p>
-                                    </div>`).join('')}
-                                </div>
-                                ${m.historialTraslados?.length ? `
-                                <div style="padding:14px 24px;background:#fffbeb;border-top:1px solid #fef3c7;">
-                                    <p style="font-size:6.5px;font-weight:900;color:#92400e;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px;">ðŸ“‹ Historial de Traslados</p>
-                                    ${m.historialTraslados.map(h=>`<p style="font-size:7.5px;color:#78350f;font-weight:600;margin-bottom:3px;">â€¢ ${h.fecha}: ${(h.origenNombre||'').split(' - ').pop()} â†’ ${(h.destinoNombre||'').split(' - ').pop()}</p>`).join('')}
-                                </div>` : ''}
-                                <div style="padding:10px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
-                                    <p style="font-size:6px;color:#cbd5e1;font-family:monospace;font-weight:700;letter-spacing:0.08em;">AMINIASDIMOR PLATFORM v9.0 â€” DOCUMENTO OFICIAL</p>
-                                    <p style="font-size:6px;color:#cbd5e1;font-weight:700;letter-spacing:0.08em;">${new Date().toLocaleDateString('es-PE')}</p>
-                                </div>
-                            </div>
-                            <div class="w-full lg:w-48 flex flex-col gap-3 flex-shrink-0">
-                                <button onclick="App.Members.exportPDF('${m.nombre}')" class="w-full bg-brand-800 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg hover:bg-brand-900 flex items-center justify-center gap-2">â¬‡ PDF</button>
-                                <button onclick="App.UI.Modals.openMemberEditor(${id})" class="w-full bg-white border-2 border-slate-200 text-slate-600 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:border-brand-500 hover:text-brand-600">âœï¸ Editar</button>
-                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mt-2">
-                                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Iglesia</p>
-                                    <p class="text-[10px] font-bold text-slate-700 leading-tight">${sedeCorta}</p>
-                                </div>
-                            </div>
-                        </div>`;
-                    setTimeout(() => {
-                        new QRCode(document.getElementById("qrcode"), {
-                            text: `AMINIAS:${m.id}|DOC:${m.tipoDoc||'DNI'}|NUM:${m.numDoc||m.dni}`,
-                            width: 58, height: 58, colorDark: "#001d36", colorLight: "#ffffff"
-                        });
-                    }, 100);
-                    this.open();
-                },
-
-                // ---- TRANSFERIR MIEMBRO (pastor/superadmin) ----
-                openTransferModal: function(memberId) {
-                    const m = App.DB.get(App.Constants.STORAGE_MEMBERS).find(x => x.id === memberId);
-                    let churches = App.DB.get(App.Constants.STORAGE_CHURCHES).filter(c => c.id !== m.iglesiaId);
-                    if (App.State.user.rol === 'pastor' && App.State.user.iglesiaIds?.length)
-                        churches = churches.filter(c => App.State.user.iglesiaIds.includes(c.id));
-                    document.getElementById('modalTitle').innerText = 'Transferir Miembro';
-                    document.getElementById('modalContent').innerHTML = `
-                        <div class="mb-6 p-4 bg-brand-50 rounded-xl border border-brand-100">
-                            <p class="text-[10px] font-black text-brand-800 uppercase">Miembro: <span class="text-brand-accent">${m.nombre}</span></p>
-                            <p class="text-[9px] text-slate-500 mt-1">Sede actual: ${m.iglesiaNombre}</p>
-                        </div>
-                        <form onsubmit="event.preventDefault(); App.Transfers.executeTransfer(${memberId}, document.getElementById('tDestino').value, document.getElementById('tDestino').options[document.getElementById('tDestino').selectedIndex].text); App.UI.Modals.close(); App.UI.Views.renderMembers();" class="space-y-4">
-                            <div class="space-y-2">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sede de Destino</label>
-                                <select id="tDestino" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold appearance-none">
-                                    <option value="" disabled selected>Seleccione destino...</option>
-                                    ${churches.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                                <button type="button" onclick="App.UI.Modals.close()" class="text-slate-400 px-6 py-3 font-bold text-[10px] uppercase">Cancelar</button>
-                                <button type="submit" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-brand-800">ðŸ”„ Ejecutar Transferencia</button>
-                            </div>
-                        </form>`;
-                    this.open();
-                },
-
-                // ---- SOLICITAR TRASLADO (sede) ----
-                openTransferRequestModal: function(memberId) {
-                    const m = App.DB.get(App.Constants.STORAGE_MEMBERS).find(x => x.id === memberId);
-                    const churches = App.DB.get(App.Constants.STORAGE_CHURCHES).filter(c => c.id !== m.iglesiaId);
-                    document.getElementById('modalTitle').innerText = 'Solicitar Traslado';
-                    document.getElementById('modalContent').innerHTML = `
-                        <div class="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
-                            <p class="text-[10px] font-black text-purple-800 uppercase">Miembro: <span class="text-purple-600">${m.nombre}</span></p>
-                            <p class="text-[9px] text-slate-500 mt-1">Esta peticiÃ³n serÃ¡ enviada para aprobaciÃ³n del Pastor.</p>
-                        </div>
-                        <form onsubmit="event.preventDefault(); const sel=document.getElementById('trDestino'); App.Transfers.requestTransfer(${memberId}, sel.value, sel.options[sel.selectedIndex].text); App.UI.Modals.close();" class="space-y-4">
-                            <div class="space-y-2">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sede de Destino Solicitada</label>
-                                <select id="trDestino" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold appearance-none">
-                                    <option value="" disabled selected>Seleccione destino...</option>
-                                    ${churches.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                                <button type="button" onclick="App.UI.Modals.close()" class="text-slate-400 px-6 py-3 font-bold text-[10px] uppercase">Cancelar</button>
-                                <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-purple-700">ðŸ“¤ Enviar PeticiÃ³n</button>
-                            </div>
-                        </form>`;
-                    this.open();
-                },
-
-                // ---- CREAR/EDITAR USUARIO (superadmin) ----
-                openUserEditor: function(id = null) {
-                    const u = id ? App.DB.get(App.Constants.STORAGE_USERS).find(x => x.id === id) : null;
-                    const churches = App.DB.get(App.Constants.STORAGE_CHURCHES);
-                    document.getElementById('modalTitle').innerText = id ? 'Editar Usuario' : 'Nuevo Usuario';
-                    document.getElementById('modalContent').innerHTML = `
-                        <form onsubmit="event.preventDefault(); App.Users.save('${id || ''}');" class="space-y-4 max-w-lg mx-auto">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Nombre Completo</label>
-                                <input type="text" id="uNombre" value="${u ? u.nombre : ''}" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Correo ElectrÃ³nico</label>
-                                <input type="email" id="uEmail" value="${u ? u.email : ''}" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">ContraseÃ±a ${id ? '(dejar en blanco para no cambiar)' : ''}</label>
-                                <input type="password" id="uPass" ${id ? '' : 'required'} class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Nivel de Acceso</label>
-                                <select id="uRol" onchange="App.UI.Modals.toggleSedeField()" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold appearance-none">
-                                    <option value="superadmin" ${u?.rol==='superadmin'?'selected':''}>ðŸ‘‘ SÃºper Admin</option>
-                                    <option value="pastor"     ${u?.rol==='pastor'?'selected':''}>â›ª Pastor / Obrero de Campo</option>
-                                    <option value="sede"       ${u?.rol==='sede'?'selected':''}>ðŸ  Sede Local</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1" id="sedeField" style="${u?.rol==='sede' ? '' : 'display:none'}">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Sede Asignada</label>
-                                <select id="uIglesia" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold appearance-none">
-                                    <option value="global">Acceso Global</option>
-                                    ${churches.map(c => `<option value="${c.id}" ${u?.iglesiaId===c.id?'selected':''}>${c.nombre}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="space-y-2" id="pastorChurchesField" style="${u?.rol==='pastor' ? '' : 'display:none'}">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Iglesias Supervisadas</label>
-                                <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3 max-h-48 overflow-y-auto" id="churchCheckboxes">
-                                    ${churches.map(c => `
-                                        <label class="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" value="${c.id}" ${u?.iglesiaIds?.includes(c.id)?'checked':''} class="w-4 h-4 accent-brand-700 rounded">
-                                            <span class="text-[10px] font-bold text-slate-700 group-hover:text-brand-700">${c.nombre}</span>
-                                        </label>`).join('')}
-                                </div>
-                                <p class="text-[8px] text-slate-400 ml-2">Si no selecciona ninguna, el pastor tendrÃ¡ acceso a todas.</p>
-                            </div>
-                            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                                <button type="button" onclick="App.UI.Modals.close()" class="text-slate-400 px-6 py-3 font-bold text-[10px] uppercase">Cancelar</button>
-                                <button type="submit" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-brand-800">ðŸ’¾ Guardar Usuario</button>
-                            </div>
-                        </form>`;
-                    this.open();
-                    this.toggleSedeField();
-                },
-                toggleSedeField: function() {
-                    const rol = document.getElementById('uRol')?.value;
-                    const sf  = document.getElementById('sedeField');
-                    const pf  = document.getElementById('pastorChurchesField');
-                    if (sf) sf.style.display = rol === 'sede' ? '' : 'none';
-                    if (pf) pf.style.display = rol === 'pastor' ? '' : 'none';
-                },
-
-                // ---- CREAR SEDE ----
-                openSedeRegistration: function() {
-                    document.getElementById('modalTitle').innerText = 'Nueva Sede';
-                    document.getElementById('modalContent').innerHTML = `
-                        <form onsubmit="event.preventDefault(); App.UI.Modals.processSedeRegistration();" class="space-y-4 max-w-lg mx-auto">
-                            <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-4 flex gap-3">
-                                <span class="text-blue-500 text-xl">â„¹ï¸</span>
-                                <p class="text-[10px] text-blue-800 leading-relaxed">Al crear una nueva sede se genera automÃ¡ticamente un usuario administrador local.</p>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Nombre de la Iglesia</label>
-                                <input type="text" id="rNombre" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1">
-                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Distrito</label>
-                                    <input type="text" id="rDistrito" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Email Admin</label>
-                                    <input type="email" id="rEmail" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                                </div>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">ContraseÃ±a</label>
-                                <input type="password" id="rPass" required class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold">
-                            </div>
-                            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                                <button type="button" onclick="App.UI.Modals.close()" class="text-slate-400 px-6 py-3 font-bold text-[10px] uppercase">Cancelar</button>
-                                <button type="submit" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-brand-800">Crear Sede</button>
-                            </div>
-                        </form>`;
-                    this.open();
-                },
-                processSedeRegistration: async function() {
-                    const n  = document.getElementById('rNombre').value.toUpperCase().trim();
-                    const d  = document.getElementById('rDistrito').value.toUpperCase().trim();
-                    const e  = document.getElementById('rEmail').value.trim();
-                    const p  = document.getElementById('rPass').value;
-                    const cid = "CH-" + Date.now();
-                    const churches = App.DB.get(App.Constants.STORAGE_CHURCHES);
-                    churches.push({ id: cid, nombre: n, distrito: d });
-                    App.DB.set(App.Constants.STORAGE_CHURCHES, churches);
-                    const created = await App.Users.createAccount({ email: e, rol: 'sede', nombre: 'Admin ' + n, iglesiaId: cid, iglesiaIds: [], activo: true }, p);
-                    if (!created) {
-                        App.DB.set(App.Constants.STORAGE_CHURCHES, churches.filter(c => c.id !== cid));
-                        return;
-                    }
-                    App.UI.Toasts.show("Sede Creada", `${n} registrada con Ã©xito.`, "success");
-                    this.close();
-                    if (!App.State.user) App.Auth.init();
-                    else if (App.State.activeView === 'churches') App.UI.Views.renderChurches();
-                    else if (App.State.activeView === 'users') App.UI.Views.renderUsers();
-                },
-                deleteSede: function(id) {
-                    if (confirm("Â¿Eliminar esta sede? El usuario admin asociado tambiÃ©n serÃ¡ eliminado.")) {
-                        App.DB.set(App.Constants.STORAGE_CHURCHES, App.DB.get(App.Constants.STORAGE_CHURCHES).filter(c => c.id !== id));
-                        App.DB.set(App.Constants.STORAGE_USERS, App.DB.get(App.Constants.STORAGE_USERS).filter(u => u.iglesiaId !== id));
-                        App.UI.Toasts.show("Sede Eliminada", "Registro borrado.", "info");
-                        App.UI.Views.renderChurches();
-                    }
-                }
-            }
-        },
-
-        // ===================== MEMBERS =====================
-        Members: {
-            processImage: function(input) {
-                if (!input.files || !input.files[0]) return;
-                if (input.files[0].size > 2000000) return App.UI.Toasts.show("Archivo muy grande", "MÃ¡ximo 2MB.", "error");
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        if (w > 400) { h *= 400/w; w = 400; }
-                        if (h > 400) { w *= 400/h; h = 400; }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        App.State.tempImage = canvas.toDataURL('image/jpeg', 0.6);
-                        document.getElementById('previewImg').src = App.State.tempImage;
-                    };
-                };
-                reader.readAsDataURL(input.files[0]);
-            },
-            save: async function(id) {
-                const apPat   = (document.getElementById('frmApPat')?.value||'').trim().toUpperCase();
-                const apMat   = (document.getElementById('frmApMat')?.value||'').trim().toUpperCase();
-                const nombres = (document.getElementById('frmNombres')?.value||'').trim().toUpperCase();
-                const numDoc  = (document.getElementById('frmNumDoc')?.value||'').trim();
-
-                if (!apPat || !apMat || !nombres) return App.UI.Toasts.show("Error", "Apellidos y nombres son obligatorios.", "error");
-                if (!numDoc) return App.UI.Toasts.show("Error", "El nÃºmero de documento es obligatorio.", "error");
-
-                const nom     = `${apPat} ${apMat} ${nombres}`;
-                const tipoDoc = document.getElementById('frmTipoDoc')?.value || 'DNI';
-                const isExt   = tipoDoc !== 'DNI';
-                const db      = App.DB.get(App.Constants.STORAGE_MEMBERS);
-
-                if (!id && db.some(x => (x.numDoc||x.dni) === numDoc))
-                    return App.UI.Toasts.show("Duplicado", "Ya existe un miembro con ese nÃºmero de documento.", "error");
-
-                const iglesiaSelect = document.getElementById('frmIglesia');
-                const iglesiaId    = iglesiaSelect ? iglesiaSelect.value : App.State.user.sedeId;
-                const iglesiaNombre= iglesiaSelect ? iglesiaSelect.options[iglesiaSelect.selectedIndex].text : App.State.user.sedeNombre;
-
-                const entry = {
-                    id: id || Date.now(),
-                    apellidoPaterno: apPat, apellidoMaterno: apMat, nombres,
-                    nombre: nom, dni: numDoc,
-                    tipoDoc, numDoc,
-                    sexo: document.getElementById('frmSexo')?.value || 'Masculino',
-                    genero: document.getElementById('frmSexo')?.value || 'Masculino',
-                    estadoCivil: document.getElementById('frmEstCivil')?.value || '',
-                    celular: document.getElementById('frmCel')?.value || '',
-                    gradoInstruccion: document.getElementById('frmGradoInst')?.value || '',
-                    ocupacion: document.getElementById('frmOcupacion')?.value || '',
-                    fechaNac: document.getElementById('frmFechaNac')?.value || '',
-                    nac: document.getElementById('frmFechaNac')?.value || '',
-                    nacDepartamento: isExt ? '' : (document.getElementById('nacDepto')?.value||''),
-                    nacProvincia:    isExt ? '' : (document.getElementById('nacProv')?.value||''),
-                    nacDistrito:     isExt ? '' : (document.getElementById('nacDist')?.value||''),
-                    nacLugarLibre:   isExt ? (document.getElementById('frmNacLibre')?.value||'') : '',
-                    domDireccion:    document.getElementById('frmDomDir')?.value || '',
-                    domDepartamento: document.getElementById('domDepto')?.value || '',
-                    domProvincia:    document.getElementById('domProv')?.value || '',
-                    domDistrito:     document.getElementById('domDist')?.value || '',
-                    procedenciaReligiosa: document.getElementById('frmProcedencia')?.value || '',
-                    condicion:  document.getElementById('frmCondicion')?.value || 'MI',
-                    bautismo:   document.getElementById('frmBau')?.value || '',
-                    pastorBautizo: document.getElementById('frmPastorBau')?.value || '',
-                    cargo:      document.getElementById('frmCar')?.value || 'Miembro',
-                    iglesiaId, iglesiaNombre,
-                    estado:  document.getElementById('frmEst')?.value || 'Activo',
-                    foto:    App.State.tempImage || `https://ui-avatars.com/api/?name=${apPat.charAt(0)}+${nombres.charAt(0)}&background=random`,
-                    historialTraslados: id ? (db.find(x => x.id === id)?.historialTraslados || []) : []
-                };
-
-                if (id) {
-                    const idx = db.findIndex(x => x.id === id);
-                    db[idx] = entry;
-                    App.UI.Toasts.show("Actualizado", "Ficha modificada exitosamente.", "success");
-                } else {
-                    db.push(entry);
-                    App.UI.Toasts.show("Registrado", "Nuevo miembro registrado.", "success");
-                }
-                App.DB.set(App.Constants.STORAGE_MEMBERS, db);
-                App.DB.syncPublicDirectory();
-                App.UI.Modals.close();
-                App.UI.Views.renderMembers();
-            },
-            delete: function(id) {
-                if (confirm("Â¿Eliminar este registro permanentemente?")) {
-                    App.DB.set(App.Constants.STORAGE_MEMBERS, App.DB.get(App.Constants.STORAGE_MEMBERS).filter(x => x.id !== id));
-                    App.DB.syncPublicDirectory();
-                    App.UI.Toasts.show("Eliminado", "Registro borrado.", "info");
-                    const q = document.getElementById('searchInput')?.value || "";
-                    App.UI.Views.renderMembers(q);
-                }
-            },
-            exportCSV: function() {
-                const list = App.State.currentList;
-                if (!list.length) return App.UI.Toasts.show("Sin datos", "No hay registros para exportar.", "info");
-                let csv = "\uFEFFNombre,DNI,GÃ©nero,Celular,Cargo,Bautismo,Estado,Sede\n";
-                list.forEach(m => { csv += `"${m.nombre}","${m.dni}","${m.genero}","${m.celular}","${m.cargo}","${m.bautismo}","${m.estado}","${m.iglesiaNombre}"\n`; });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-                a.download = `Reporte_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-                App.UI.Toasts.show("Exportado", "Archivo CSV generado.", "success");
-            },
-            exportPDF: function(name) {
-                App.UI.Toasts.show("Generando PDF", "Procesando...", "info");
-                html2pdf().set({
-                    margin: 0.2, filename: `Credencial_${name.replace(/ /g,'_')}.pdf`,
-                    image: { type: 'jpeg', quality: 1 },
-                    html2canvas: { scale: 4, useCORS: true },
-                    jsPDF: { unit: 'in', format: [4, 5], orientation: 'portrait' }
-                }).from(document.getElementById('capturePDF')).save()
-                  .then(() => App.UI.Toasts.show("PDF Listo", "Documento descargado.", "success"));
-            }
-        },
-
-        // ===================== USERS =====================
-        Users: {
-            createAccount: async function(profile, password) {
-                const signupClient = window.supabase.createClient(App.Constants.SUPABASE_URL, App.Constants.SUPABASE_ANON_KEY, {
-                    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-                });
-                const { data, error } = await signupClient.auth.signUp({ email: profile.email, password });
-                if (error || !data.user) {
-                    App.UI.Toasts.show("Usuario", error?.message || "No fue posible registrar la cuenta.", "error");
-                    return null;
-                }
-                const record = { ...profile, id: data.user.id };
-                const { error: profileError } = await App.DB.client.from('perfiles').insert({ user_id: data.user.id, data: record });
-                if (profileError) {
-                    App.UI.Toasts.show("Usuario", "La cuenta fue creada, pero no pudo asignarse su perfil.", "error");
-                    return null;
-                }
-                const users = App.DB.get(App.Constants.STORAGE_USERS);
-                users.push(record);
-                App.DB.setLocal(App.Constants.STORAGE_USERS, users);
-                return record;
-            },
-            save: async function(id) {
-                const nombre = document.getElementById('uNombre').value.trim();
-                const email  = document.getElementById('uEmail').value.trim();
-                const pass   = document.getElementById('uPass').value;
-                const rol    = document.getElementById('uRol').value;
-                const iglesia= document.getElementById('uIglesia');
-                const iglesiaId = (rol === 'sede' && iglesia) ? iglesia.value : 'global';
-                const iglesiaIds = rol === 'pastor'
-                    ? Array.from(document.querySelectorAll('#churchCheckboxes input:checked')).map(cb => cb.value)
-                    : [];
-
-                const users = App.DB.get(App.Constants.STORAGE_USERS);
-
-                if (id) {
-                    const idx = users.findIndex(u => u.id === id);
-                    if (idx === -1) return;
-                    users[idx] = { ...users[idx], nombre, email, rol, iglesiaId, iglesiaIds, activo: users[idx].activo !== false };
-                    if (pass) App.UI.Toasts.show("ContraseÃ±a", "La contraseÃ±a se cambia mediante recuperaciÃ³n de Supabase Auth.", "info");
-                    App.UI.Toasts.show("Usuario Actualizado", `${nombre} modificado.`, "success");
-                } else {
-                    if (!pass) return App.UI.Toasts.show("Error", "La contraseÃ±a es obligatoria.", "error");
-                    if (users.some(u => u.email === email)) return App.UI.Toasts.show("Duplicado", "Ya existe un usuario con ese correo.", "error");
-                    const created = await this.createAccount({ nombre, email, rol, iglesiaId, iglesiaIds, activo: true }, pass);
-                    if (!created) return;
-                    App.UI.Toasts.show("Usuario Creado", `${nombre} registrado con acceso ${rol}.`, "success");
-                }
-                if (id) App.DB.set(App.Constants.STORAGE_USERS, users);
-                App.UI.Modals.close();
-                App.UI.Views.renderUsers();
-            },
-            delete: function(id) {
-                if (confirm("Â¿Desactivar este usuario?")) {
-                    const users = App.DB.get(App.Constants.STORAGE_USERS);
-                    const user = users.find(u => u.id === id);
-                    if (!user) return;
-                    user.activo = false;
-                    App.DB.set(App.Constants.STORAGE_USERS, users);
-                    App.UI.Toasts.show("Desactivado", "El acceso del usuario fue desactivado.", "info");
-                    App.UI.Views.renderUsers();
-                }
-            }
-        },
-
-        // ===================== TRANSFERS =====================
-        Transfers: {
-            requestTransfer: function(memberId, destinoId, destinoNombre) {
-                const member = App.DB.get(App.Constants.STORAGE_MEMBERS).find(m => m.id === memberId);
-                if (!member) return;
-                const transfers = App.DB.get(App.Constants.STORAGE_TRANSFERS);
-                transfers.push({
-                    id: 'TRF-' + Date.now(), tipo: 'peticion',
-                    memberId, memberNombre: member.nombre,
-                    origenId: member.iglesiaId, origenNombre: member.iglesiaNombre,
-                    destinoId, destinoNombre,
-                    solicitadoPor: App.State.user.id, solicitadoPorNombre: App.State.user.nombre,
-                    fecha: new Date().toISOString().slice(0,10), estado: 'pendiente'
-                });
-                App.DB.set(App.Constants.STORAGE_TRANSFERS, transfers);
-                App.UI.Toasts.show("PeticiÃ³n Enviada", "El Pastor recibirÃ¡ la solicitud para su aprobaciÃ³n.", "success");
-            },
-            executeTransfer: function(memberId, destinoId, destinoNombre) {
-                const members = App.DB.get(App.Constants.STORAGE_MEMBERS);
-                const idx = members.findIndex(m => m.id === memberId);
-                if (idx === -1) return;
-                const member = members[idx];
-                if (!member.historialTraslados) member.historialTraslados = [];
-                member.historialTraslados.push({
-                    fecha: new Date().toISOString().slice(0,10),
-                    origenId: member.iglesiaId, origenNombre: member.iglesiaNombre,
-                    destinoId, destinoNombre, ejecutadoPor: App.State.user.nombre
-                });
-                member.iglesiaId = destinoId;
-                member.iglesiaNombre = destinoNombre;
-                members[idx] = member;
-                App.DB.set(App.Constants.STORAGE_MEMBERS, members);
-                App.DB.syncPublicDirectory();
-
-                const transfers = App.DB.get(App.Constants.STORAGE_TRANSFERS);
-                transfers.push({
-                    id: 'TRF-' + Date.now(), tipo: 'transferencia',
-                    memberId, memberNombre: member.nombre,
-                    origenId: member.historialTraslados.at(-1).origenId,
-                    origenNombre: member.historialTraslados.at(-1).origenNombre,
-                    destinoId, destinoNombre,
-                    ejecutadoPor: App.State.user.nombre,
-                    fecha: new Date().toISOString().slice(0,10), estado: 'completado'
-                });
-                App.DB.set(App.Constants.STORAGE_TRANSFERS, transfers);
-                App.UI.Toasts.show("Transferencia Exitosa", `${member.nombre} trasladado a ${destinoNombre}.`, "success");
-            },
-            approvePetition: function(transferId) {
-                const trf = App.DB.get(App.Constants.STORAGE_TRANSFERS).find(t => t.id === transferId);
-                if (!trf) return;
-                this.executeTransfer(trf.memberId, trf.destinoId, trf.destinoNombre);
-                const transfers = App.DB.get(App.Constants.STORAGE_TRANSFERS);
-                const idx = transfers.findIndex(t => t.id === transferId);
-                if (idx !== -1) {
-                    transfers[idx].estado = 'aprobado';
-                    transfers[idx].aprobadoPor = App.State.user.nombre;
-                    App.DB.set(App.Constants.STORAGE_TRANSFERS, transfers);
-                }
-                App.UI.Views.renderTransfers();
-            },
-            rejectPetition: function(transferId) {
-                const transfers = App.DB.get(App.Constants.STORAGE_TRANSFERS);
-                const idx = transfers.findIndex(t => t.id === transferId);
-                if (idx === -1) return;
-                transfers[idx].estado = 'rechazado';
-                transfers[idx].rechazadoPor = App.State.user.nombre;
-                App.DB.set(App.Constants.STORAGE_TRANSFERS, transfers);
-                App.UI.Toasts.show("Rechazado", "La peticiÃ³n fue rechazada.", "info");
-                App.UI.Views.renderTransfers();
-            }
-        },
-
-        // ===================== BOOTSTRAP =====================
-        bootstrap: async function() {
-            const progress = document.getElementById('loaderProgress');
-            const text     = document.getElementById('loaderText');
-            setTimeout(async () => { progress.style.width = '30%'; text.innerText = 'Cargando Base de Datos...'; await App.DB.init(); }, 400);
-            setTimeout(() => { progress.style.width = '70%'; text.innerText = 'Inicializando MÃ³dulos...'; App.Auth.init(); }, 1200);
-            setTimeout(() => {
-                progress.style.width = '100%'; text.innerText = 'Sistema Listo';
-                document.getElementById('mainLoader').classList.add('opacity-0');
-                setTimeout(() => {
-                    document.getElementById('mainLoader').style.display = 'none';
-                    document.getElementById('loginSection').classList.remove('hidden-section');
-                }, 800);
-            }, 1800);
+</section>
+
+<section id="buscador" class="section-padding bg-dark-section">
+    <div class="section-inner">
+        <div class="search-glass">
+            <div style="flex: 1; min-width: 300px;">
+                <div class="section-label" style="justify-content: flex-start; margin-bottom: 8px;">Directorio Interno</div>
+                <h2 class="section-title" style="font-size: 2rem; margin:0; text-align: left;">BÃºsqueda de Miembros</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; margin-top: 5px;">Consulte el registro oficial de la MisiÃ³n Oriente.</p>
+            </div>
+            <input type="text" id="directorySearch" class="input-elegant" placeholder="Ingrese el nombre del hermano(a)...">
+            <button type="button" id="directoryButton" class="btn-elegant" style="padding: 18px 36px; border-radius: 8px; font-size: 11px;">Consultar Base</button>
+            <div id="directoryResults" class="directory-results" aria-live="polite"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const SUPABASE_URL = 'https://huemneiieuaupoelzhxf.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_0JjouF78Punamok9A0zdPA_fhcUwFS6';
+    const publicDirectoryClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    async function searchDirectory() {
+        const term = document.getElementById('directorySearch').value.trim();
+        const results = document.getElementById('directoryResults');
+        if (term.length < 2) {
+            results.innerHTML = '<p class="directory-message">Ingrese al menos dos letras para buscar.</p>';
+            return;
         }
-    };
 
-    window.addEventListener('DOMContentLoaded', () => App.bootstrap());
+        results.innerHTML = '<p class="directory-message">Consultando directorio...</p>';
+        const { data, error } = await publicDirectoryClient
+            .from('directorio_publico')
+            .select('nombre,iglesia')
+            .ilike('nombre', `%${term}%`)
+            .order('nombre')
+            .limit(20);
 
-    // ===== UBIGEO PERÃš =====
-    App.PERU_UBIGEO = {
-      "Amazonas":{"Chachapoyas":["Chachapoyas","AsunciÃ³n","Balsas","Cheto","ChiliquÃ­n","Chuquibamba","Granada","Huancas","La Jalca","Leimebamba","Levanto","Magdalena","Molinopampa","Montevideo","Olleros","Quinjalca","Soloco","Sonche"],"Bagua":["Bagua","Aramango","Copallin","El Parco","Imaza","La Peca"],"BongarÃ¡":["Jumbilla","Chisquilla","Churuja","Corosha","Cuispes","Florida","JazÃ¡n","Recta","San Carlos","Shipasbamba","Valera","Yambrasbamba"],"Condorcanqui":["Santa MarÃ­a de Nieva","El Cenepa","RÃ­o Santiago"],"Luya":["Lamud","Camporredondo","Cocabamba","Colcamar","Conila","Inguilpata","Longuita","Lonya Chico","Luya","MarÃ­a","Ocalli","Pisuquia","San CristÃ³bal","San JerÃ³nimo","Santa Catalina","Santo TomÃ¡s","Tingo","Trita"],"RodrÃ­guez de Mendoza":["San NicolÃ¡s","Chirimoto","Cochamal","Huambo","Limabamba","Longar","Mariscal Benavides","Milpuc","Omia","Santa Rosa","Totora","Vista Alegre"],"Utcubamba":["Bagua Grande","Cajaruro","Cumba","El Milagro","Jamalca","Lonya Grande","YamÃ³n"]},
-      "Ãncash":{"Huaraz":["Huaraz","Cochabamba","Colcabamba","Huanchay","Independencia","Jangas","La Libertad","Olleros","Pampas Grande","Paro","Pira","Tarica"],"Aija":["Aija","Coris","HuacllÃ¡n","La Merced","Succha"],"Antonio Raymondi":["LlamellÃ­n","Aczo","Chaccho","Chingas","Mirgas","San Juan de Rontoy"],"AsunciÃ³n":["Chacas","Acochaca"],"Bolognesi":["ChiquiÃ¡n","Aquia","Cajacay","Canis","Colquioc","Huallanca","Huasta","Mangas","Ticllos"],"Carhuaz":["Carhuaz","Acopampa","Amashca","Anta","MarcarÃ¡","Pamparak","San Miguel de Aco","Shilla","Tinco","Yungar"],"Casma":["Casma","Buena Vista Alta","Comandante Noel","Monte Peruano","Quillo","YautÃ¡n"],"Huari":["Huari","Anra","Cajay","ChavÃ­n de Huantar","Huacachi","Huacchis","Huachis","Huantar","Masin","San Marcos","San Pedro de Chana","Uco"],"Huarmey":["Huarmey","CochapetÃ­","Culebras","Huayan","Malvas"],"Huaylas":["Caraz","Huallanca","Huata","Huaylas","Mato","Pamparomas","Pueblo Libre","Santa Cruz","Santo Toribio","Yuracmarca"],"Ocros":["Ocros","Acas","Cajamarquilla","Carhuapampa","Cochas","Congas","Llipa"],"Pallasca":["Cabana","Bolognesi","Conchucos","Huacaschuque","Llapo","Pallasca","Pampas","Santa Rosa","Tauca"],"Pomabamba":["Pomabamba","Huayllan","Parobamba","Quinuabamba"],"Santa":["Chimbote","Coishco","Macate","Moro","NepeÃ±a","Samanco","Santa","Nuevo Chimbote"],"Sihuas":["Sihuas","Acobamba","Alfonso Ugarte","Cashapampa","Huayllabamba","Ragash","San Juan","Sicsibamba"],"Yungay":["Yungay","Cascapara","Mancos","Matacoto","Quillo","Ranrahirca","Shupluy","Yanama"]},
-      "ApurÃ­mac":{"Abancay":["Abancay","Chacoche","Circa","Curahuasi","Huanipaca","Lambrama","Pichirhua","San Pedro de Cachora","Tamburco"],"Andahuaylas":["Andahuaylas","Andarapa","Chiara","Huancarama","Huancaray","Kishuara","Pacobamba","Pacucha","Pampachiri","San JerÃ³nimo","Santa MarÃ­a de Chicmo","Talavera","Turpo"],"Aymaraes":["Chalhuanca","Caraybamba","Chapimarca","Colcabamba","Cotaruse","Justo Apu Sahuaraura","Lucre","Pocohuanca","SaÃ±ayca","Soraya","Tapairihua","Tintay","Toraya","Yanaca"],"Cotabambas":["Tambobamba","Cotabambas","Coyllurqui","Haquira","Mara","Challhuahuacho"],"Chincheros":["Chincheros","Anco-Huallo","Cocharcas","Huaccana","Ocobamba","Ongoy","Uranmarca"],"Grau":["Chuquibambilla","Curpahuasi","Gamarra","Huayllati","Mamara","Pataypampa","Progreso","San Antonio","Santa Rosa","Vilcabamba"]},
-      "Arequipa":{"Arequipa":["Arequipa","Alto Selva Alegre","Cayma","Cerro Colorado","Characato","Chiguata","Jacobo Hunter","JosÃ© Luis Bustamante y Rivero","La Joya","Mariano Melgar","Miraflores","Mollebaya","Paucarpata","Sabandia","Sachaca","San Juan de Siguas","Santa Isabel de Siguas","Socabaya","Tiabaya","Uchumayo","Yanahuara","Yarabamba","Yura"],"CamanÃ¡":["CamanÃ¡","JosÃ© MarÃ­a Quimper","Mariano NicolÃ¡s ValcÃ¡rcel","Mariscal CÃ¡ceres","NicolÃ¡s de PiÃ©rola","OcoÃ±a","Quilca","Samuel Pastor"],"CaravelÃ­":["CaravelÃ­","AcarÃ­","Atico","Atiquipa","Bella UniÃ³n","Chala","Chaparra","Lomas","Yauca"],"Castilla":["Aplao","Andagua","Ayo","Chachas","Chilcaymarca","Choco","Huancarqui","Machaguay","Orcopampa","Pampacolca","Viraco"],"Caylloma":["Chivay","Achoma","Cabanaconde","Callalli","Caylloma","Coporaque","Huambo","Huanca","Ichupampa","Lari","Lluta","Maca","Madrigal","Sibayo","Tapay","Tisco","Tuti","Yanque","Majes"],"Condesuyos":["Chuquibamba","Andaray","Cayarani","Chichas","Iray","RÃ­o Grande","Salamanca","Yanaquihua"],"Islay":["Mollendo","Cocachacra","Dean Valdivia","Islay","Mejia","Punta de BombÃ³n"],"La UniÃ³n":["Cotahuasi","Alca","Charcana","Huaynacotas","Pampamarca","Puyca","Quechualla","Sayla","Tauria","Tomepampa","Toro"]},
-      "Ayacucho":{"Huamanga":["Ayacucho","Acocro","Acos Vinchos","Carmen Alto","Chiara","Ocros","Pacaycasa","Quinua","San JosÃ© de Ticllas","San Juan Bautista","Santiago de Pischa","Socos","Tambillo","Vinchos","JesÃºs Nazareno"],"Cangallo":["Cangallo","Chuschi","Los Morochucos","MarÃ­a Parado de Bellido","Paras","Totos"],"Huanca Sancos":["Sancos","Carapo","Sacsamarca"],"Huanta":["Huanta","Ayahuanco","Huamanguilla","Iguain","Luricocha","Santillana","Sivia","Llochegua","Uchuraccay"],"La Mar":["San Miguel","Anco","Ayna","Chilcas","Chungui","Luis Carranza","Santa Rosa","Tambo"],"Lucanas":["Puquio","Aucara","Cabana","ChaviÃ±a","Chipao","Huac-Huas","Laramate","Lucanas","OcaÃ±a","Otoca","San Juan","San Pedro","Santa LucÃ­a"],"Parinacochas":["Coracora","Chumpi","Coronel CastaÃ±eda","Pacapausa","Pullo","Puyusca","Upahuacho"],"Sucre":["Querobamba","Belen","Chalcos","Chilcayoc","HuacaÃ±a","Morcolla","Paico","Santiago de Paucaray"],"VÃ­ctor Fajardo":["Huancapi","Alcamenca","Apongo","Asquipata","Canaria","Cayara","Colca","Huaya","Sarhua","Vilcanchos"],"Vilcas HuamÃ¡n":["Vilcas HuamÃ¡n","Accomarca","Carhuanca","ConcepciÃ³n","Huambalpa","Independencia","Saurama","Vischongo"]},
-      "Cajamarca":{"Cajamarca":["Cajamarca","AsunciÃ³n","Chetilla","Cospan","EncaÃ±ada","JesÃºs","Llacanora","Los BaÃ±os del Inca","Magdalena","Namora","San Juan"],"Cajabamba":["Cajabamba","Cachachi","Condebamba","Sitacocha"],"CelendÃ­n":["CelendÃ­n","Chumuch","Cortegana","Huasmin","Jorge ChÃ¡vez","JosÃ© GÃ¡lvez","Miguel Iglesias","Oxamarca","Sorochuco","Sucre","Utco"],"Chota":["Chota","Anguia","Chadin","Chiguirip","Choropampa","Cochabamba","Conchan","Huambos","Lajas","Llama","Miracosta","Paccha","Querocoto","Tacabamba","Tocmoche"],"Cutervo":["Cutervo","Callayuc","Cujillo","La Ramada","Pimpingos","Querocotillo","San AndrÃ©s de Cutervo","San Juan de Cutervo","Santa Cruz","Santo TomÃ¡s","Socota"],"Hualgayoc":["Bambamarca","Chugur","Hualgayoc"],"JaÃ©n":["JaÃ©n","Bellavista","Chontali","Colasay","Huabal","Las Pirias","Pomahuaca","Pucara","Sallique","San Felipe","San JosÃ© del Alto","Santa Rosa"],"San Ignacio":["San Ignacio","Chirinos","Huarango","La Coipa","Namballe","San JosÃ© de Lourdes","Tabaconas"],"San Marcos":["Pedro GÃ¡lvez","Chancay","Eduardo Villanueva","Gregorio Pita","Ichocan","JosÃ© Manuel Quiroz","JosÃ© Sabogal"],"San Miguel":["San Miguel","BolÃ­var","Calquis","El Prado","La Florida","Llapa","Nanchoc","Niepos","Tongod"],"San Pablo":["San Pablo","San Bernardino","San Luis","TumbadÃ©n"],"Santa Cruz":["Santa Cruz","Andabamba","Catache","La Esperanza","Ninabamba","Pulan","Saucepampa","Sexi","Yauyucan"]},
-      "Callao":{"Callao":["Callao","Bellavista","Carmen de La Legua Reynoso","La Perla","La Punta","Ventanilla","Mi PerÃº"]},
-      "Cusco":{"Cusco":["Cusco","Ccorca","Poroy","San JerÃ³nimo","San SebastiÃ¡n","Santiago","Saylla","Wanchaq"],"Acomayo":["Acomayo","Acopia","Acos","Mosoc Llacta","Pomacanchi","Rondocan","SangararÃ¡"],"Anta":["Anta","Ancahuasi","Cachimayo","Chinchaypujio","Huarocondo","Limatambo","Mollepata","Pucyura","Zurite"],"Calca":["Calca","Coya","Lamay","Lares","Pisac","San Salvador","Taray","Yanatile"],"Canas":["Yanaoca","Checca","Kunturkanki","Langui","Layo","Pampamarca","Quehue","TÃºpac Amaru"],"Canchis":["Sicuani","Checacupe","Combapata","Marangani","Pitumarca","San Pablo","San Pedro","Tinta"],"Chumbivilcas":["Santo TomÃ¡s","Capacmarca","Chamaca","Colquemarca","Livitaca","Llusco","QuiÃ±ota","Velille"],"Espinar":["Espinar","Condoroma","Coporaque","Ocoruro","Pallpata","Pichigua","Yauri"],"La ConvenciÃ³n":["Santa Ana","Echarate","Huayopata","Maranura","Ocobamba","Quellouno","Kimbiri","Santa Teresa","Vilcabamba","Pichari"],"Paruro":["Paruro","Accha","Ccapi","Colcha","Huanoquite","Omacha","Paccaritambo","Pillpinto","Yaurisque"],"Paucartambo":["Paucartambo","Caicay","Challabamba","Colquepata","Huancarani","KosÃ±ipata"],"Quispicanchi":["Urcos","Andahuaylillas","Camanti","Ccarhuayo","Ccatca","Cusipata","Huaro","Lucre","Marcapata","Ocongate","Oropesa","Quiquijana"],"Urubamba":["Urubamba","Chinchero","Huayllabamba","Machupicchu","Maras","Ollantaytambo","Yucay"]},
-      "Huancavelica":{"Huancavelica":["Huancavelica","Acobambilla","Acoria","Conayca","Cuenca","Huachocolpa","Izcuchaca","Laria","Manta","Moya","Palca","Pilchaca","Vilca","Yauli","AscensiÃ³n","Huando"],"Acobamba":["Acobamba","Andabamba","Anta","Caja","Marcas","Paucara","Pomacocha","Rosario"],"Angaraes":["Lircay","Anchonga","Callanmarca","Ccochaccasa","Chincho","Congalla","Huanca-Huanca","Huayllay Grande","Julcamarca","Secclla"],"Castrovirreyna":["Castrovirreyna","Arma","Aurahua","Capillas","Chupamarca","Cocas","Huachos","Mollepampa","Ticrapo"],"Churcampa":["Churcampa","Anco","Chinchihuasi","El Carmen","La Merced","Locroja","Paucarbamba","San Miguel de Mayocc","San Pedro de Coris"],"HuaytarÃ¡":["HuaytarÃ¡","Ayavi","CÃ³rdova","Huayacundo Arma","Laramarca","Ocoyo","Pilpichaca","Querco","San Antonio de Cusicancha","Santiago de Chocorvos"],"Tayacaja":["Pampas","Acostambo","Acraquia","Ahuaycha","Colcabamba","Daniel HernÃ¡ndez","Huaribamba","Pazos","Quichuas","Salcabamba","Surcubamba"]},
-      "HuÃ¡nuco":{"HuÃ¡nuco":["HuÃ¡nuco","Amarilis","Chinchao","Churubamba","Margos","Quisqui","San Francisco de Cayran","Santa MarÃ­a del Valle","Yarumayo","Pillco Marca"],"Ambo":["Ambo","Cayna","Colpas","Conchamarca","HuÃ¡car","San Francisco","San Rafael","Tomay Kichwa"],"Dos de Mayo":["La UniÃ³n","Chuquis","Marias","Pachas","Quivilla","Ripan","Shunqui","Sillapata","Yanas"],"HuamalÃ­es":["Llata","Arancay","ChavÃ­n de Pariarca","Jacas Grande","JircÃ¡n","Miraflores","MonzÃ³n","Punchao","PuÃ±os","Singa","Tantamayo"],"Leoncio Prado":["Tingo MarÃ­a","Daniel Alomia Robles","Hermilio Valdizan","JosÃ© Crespo y Castillo","Luyando","Mariano DÃ¡maso BeraÃºn"],"MaraÃ±Ã³n":["Huacrachuco","Cholon","San Buenaventura"],"Pachitea":["Panao","Chaglla","Molino","Umari"],"Puerto Inca":["Puerto Inca","Codo del Pozuzo","Honoria","Tournavista","Yuyapichis"]},
-      "Ica":{"Ica":["Ica","La TinguiÃ±a","Los Aquijes","Ocucaje","PachacÃºtec","Parcona","Pueblo Nuevo","San JosÃ© de Los Molinos","San Juan Bautista","Santiago","Subtanjalla","Tate","Yauca del Rosario"],"Chincha":["Chincha Alta","Alto LarÃ¡n","Chavin","Chincha Baja","El Carmen","Grocio Prado","Pueblo Nuevo","Sunampe","Tambo de Mora"],"Nazca":["Nazca","Changuillo","El Ingenio","Marcona","Vista Alegre"],"Palpa":["Palpa","Llipata","RÃ­o Grande","Santa Cruz","Tibillo"],"Pisco":["Pisco","Huancano","Humay","Independencia","Paracas","San AndrÃ©s","San Clemente","Tupac Amaru Inca"]},
-      "JunÃ­n":{"Huancayo":["Huancayo","Carhuacallanga","Chacapampa","Chicche","Chilca","Chongos Alto","Chupuro","Colca","El Tambo","Huacrapuquio","Hualhuas","Huancan","Huasicancha","Huayucachi","Ingenio","Pariahuanca","Pilcomayo","PucarÃ¡","Quichuay","San AgustÃ­n","San JerÃ³nimo de TunÃ¡n","SaÃ±o","Sapallanga","Sicaya"],"Chanchamayo":["Chanchamayo","PerenÃ©","Pichanaqui","San Luis de Shuaro","San RamÃ³n","Vitoc"],"ConcepciÃ³n":["ConcepciÃ³n","Aco","Andamarca","Chambara","Cochas","Comas","Manzanares","Matahuasi","Mito","Nueve de Julio","Orcotuna","San JosÃ© de Quero","Santa Rosa de Ocopa"],"JunÃ­n":["JunÃ­n","Carhuamayo","Ondores","Ulcumayo"],"Satipo":["Satipo","Coviriali","Llaylla","Mazamari","Pampa Hermosa","Pangoa","RÃ­o Negro","RÃ­o Tambo"],"Tarma":["Tarma","Acobamba","Huaricolca","Huasahuasi","La UniÃ³n","Palca","Palcamayo","San Pedro de Cajas","Tapo"],"Yauli":["La Oroya","Chacapalpa","Huay-Huay","Marcapomacocha","Morococha","Paccha","Santa Rosa de Sacco","Yauli"],"Chupaca":["Chupaca","Ahuac","Chongos Bajo","Huachac","Huamancaca Chico","San Juan de Iscos","Yanacancha"]},
-      "La Libertad":{"Trujillo":["Trujillo","El Porvenir","Florencia de Mora","Huanchaco","La Esperanza","Laredo","Moche","Poroto","Salaverry","Simbal","Victor Larco Herrera"],"Ascope":["Ascope","Chicama","Chocope","Guadalupe","Paijan","Razuri","Santiago de Cao"],"BolÃ­var":["BolÃ­var","Bambamarca","Condormarca","Longotea","Uchumarca","Ucuncha"],"ChepÃ©n":["ChepÃ©n","Pacanga","Pueblo Nuevo"],"JulcÃ¡n":["JulcÃ¡n","Calamarca","Carabamba","Huaso"],"Otuzco":["Otuzco","Agallpampa","Charat","Huaranchal","Mache","Paranday","Salpo","Sinsicap","Usquil"],"Pacasmayo":["San Pedro de Lloc","Guadalupe","Jequetepeque","Pacasmayo","San JosÃ©"],"Pataz":["Tayabamba","Buldibuyo","Chillia","Huaylillas","Huancaspata","Ongon","Parcoy","Pias","Taurija","Urpay"],"SÃ¡nchez CarriÃ³n":["Huamachuco","Chugay","Cochorco","Curgos","Marcabal","SarÃ­n","Sartimbamba","Sanagoran"],"Santiago de Chuco":["Santiago de Chuco","Angasmarca","Cachicadan","Mollebamba","Mollepata","Quiruvilca","Santa Cruz de Chuca"],"Gran ChimÃº":["Cascas","Lucma","Marmot","Sayapullo"],"VirÃº":["VirÃº","Chao","Guadalupito"]},
-      "Lambayeque":{"Chiclayo":["Chiclayo","Chongoyape","Eten","JosÃ© Leonardo Ortiz","La Victoria","Lagunas","Monsefu","Nueva Arica","Oyotun","Picsi","Pimentel","Reque","Santa Rosa","SaÃ±a","Cayalti","Patapo","Pomalca","Pucala","TumÃ¡n"],"FerreÃ±afe":["FerreÃ±afe","CaÃ±aris","Incahuasi","Pitipo","Pueblo Nuevo"],"Lambayeque":["Lambayeque","Chochope","Illimo","Jayanca","Mochumi","Morrope","Motupe","Olmos","Pacora","Salas","San JosÃ©","Tucume"]},
-      "Lima":{"Lima":["AncÃ³n","Ate","Barranco","BreÃ±a","Carabayllo","Chaclacayo","Chorrillos","Cieneguilla","Comas","El Agustino","Independencia","JesÃºs MarÃ­a","La Molina","La Victoria","Lince","Los Olivos","Lurigancho","LurÃ­n","Magdalena del Mar","Miraflores","PachacÃ¡mac","Pueblo Libre","Puente Piedra","RÃ­mac","San Borja","San Isidro","San Juan de Lurigancho","San Juan de Miraflores","San Luis","San MartÃ­n de Porres","San Miguel","Santa Anita","Santiago de Surco","Surquillo","Villa El Salvador","Villa MarÃ­a del Triunfo"],"Barranca":["Barranca","Ãmbar","Pativilca","Supe","Supe Puerto"],"Canta":["Canta","Arahuay","Huamantanga","Huaros","Lachaqui","San Buenaventura","Santa Rosa de Quives"],"CaÃ±ete":["San Vicente de CaÃ±ete","Asia","Calango","Cerro Azul","Chilca","Imperial","LunahuanÃ¡","Mala","Nuevo Imperial","San Antonio","San Luis","Santa Cruz de Flores","ZÃºÃ±iga"],"Huaral":["Huaral","Atavillos Alto","Atavillos Bajo","Aucallama","Chancay","Ihuari","Lampian","Pacaraos","Santa Cruz de Andamarca"],"HuarochirÃ­":["Matucana","Antioquia","Callahuanca","Carampoma","Chicla","Huachupampa","HuarochirÃ­","Lahuaytambo","Langa","Laraos","Ricardo Palma","San AndrÃ©s de Tupicocha","San DamiÃ¡n","Santa Eulalia","Santo Domingo de los Olleros"],"Huaura":["Huacho","Ambar","Caleta de Carquin","Checras","Hualmay","Huaura","Leoncio Prado","Paccho","Santa MarÃ­a","Sayan","Vegueta"],"OyÃ³n":["OyÃ³n","Andajes","Caujul","Cochamarca","Navan","Pachangara"],"Yauyos":["Yauyos","Alis","Ayauca","Ayaviri","Cacra","Chocos","Cochas","Colonia","Huancaya","Huangascar","Laraos","Lincha","Madean","Miraflores","Omas","Putinza","Quinches","San JoaquÃ­n","Tanta","Tomas","Tupe","ViÃ±ac","Vitis"]},
-      "Loreto":{"Maynas":["Iquitos","Alto Nanay","Fernando Lores","Indiana","Las Amazonas","Mazan","Napo","Punchana","Torres Causana","BelÃ©n","San Juan Bautista"],"Alto Amazonas":["Yurimaguas","Balsapuerto","Jeberos","Lagunas","Santa Cruz","Teniente CÃ©sar LÃ³pez Rojas"],"Loreto":["Nauta","Parinari","Tigre","Trompeteros","Urarinas"],"Mariscal RamÃ³n Castilla":["RamÃ³n Castilla","Pebas","Yavari","San Pablo"],"Requena":["Requena","Alto Tapiche","Capelo","Maquia","Puinahua","Saquena","Soplin","Tapiche","Jenaro Herrera"],"Ucayali":["Contamana","Inahuaya","Padre MÃ¡rquez","Pampa Hermosa","Sarayacu"],"Datem del MaraÃ±Ã³n":["San Lorenzo","Andoas","Barranca","Cahuapanas","Manseriche","Morona","Pastaza"],"Putumayo":["El Estrecho","Huapapa","Nuevo Arica","Rosa Panduro","Yaguas"]},
-      "Madre de Dios":{"Tambopata":["Tambopata","Las Piedras","Laberinto","Inambari"],"Manu":["Manu","Fitzcarrald","Madre de Dios","Huepetuhe"],"Tahuamanu":["IÃ±apari","Iberia","Tahuamanu"]},
-      "Moquegua":{"Mariscal Nieto":["Moquegua","Carumas","Cuchumbaya","Samegua","San CristÃ³bal","Torata"],"General SÃ¡nchez Cerro":["Omate","Chojata","Coalaque","IchuÃ±a","La Capilla","Lloque","Matalaque","Puquina","Ubinas","Yunga"],"Ilo":["Ilo","El Algarrobal","Pacocha"]},
-      "Pasco":{"Pasco":["Chaupimarca","Huachon","Huariaca","Huayllay","Ninacaca","Pallanchacra","Paucartambo","SimÃ³n BolÃ­var","Ticlacayan","Tinyahuarco","Vicco","Yanacancha"],"Daniel Alcides CarriÃ³n":["Yanahuanca","Chacayan","Goyllarisquizga","Paucar","San Pedro de Pillao","Santa Ana de Tusi","Tapuc","Vilcabamba"],"Oxapampa":["Oxapampa","Chontabamba","Huancabamba","Palaz","Pozuzo","Puerto BermÃºdez","Villa Rica","ConstituciÃ³n"]},
-      "Piura":{"Piura":["Piura","Castilla","Catacaos","Cura MorÃ­","El Tallan","La Arena","La UniÃ³n","Las Lomas","Tambo Grande","VeintisÃ©is de Octubre"],"Ayabaca":["Ayabaca","Frias","Jilili","Lagunas","Montero","Pacaipampa","Paimas","Sapillica","Sicchez","Suyo"],"Huancabamba":["Huancabamba","Canchaque","El Carmen de la Frontera","Huarmaca","Lalaquiz","San Miguel del Faique","Sondor","Sondorillo"],"MorropÃ³n":["Chulucanas","Buenos Aires","Chalaco","La Matanza","Morropon","Salitral","San Juan de Bigote","Santa Catalina de Mossa","Santo Domingo","Yamango"],"Paita":["Paita","Amotape","Arenal","Colan","La Huaca","Tamarindo","Vichayal"],"Sullana":["Sullana","Bellavista","Ignacio Escudero","Lancones","Marcavelica","Miguel Checa","Querecotillo","Salitral"],"Talara":["PariÃ±as","El Alto","La Brea","Lobitos","Los Ã“rganos","Mancora"],"Sechura":["Sechura","Bellavista de la UniÃ³n","Bernal","Cristo Nos Valga","Vice"]},
-      "Puno":{"Puno":["Puno","Acora","Amantani","Atuncolla","Capachica","Chucuito","Coata","Huata","MaÃ±azo","Paucarcolla","Pichacani","PlaterÃ­a","San Antonio","Tiquillaca","Vilque"],"AzÃ¡ngaro":["AzÃ¡ngaro","Achaya","Arapa","Asillo","Caminaca","Chupa","JosÃ© Domingo Choquehuanca","MuÃ±ani","Potoni","Saman","San AntÃ³n","San JosÃ©","San Juan de Salinas","Santiago de Pupuja","Tirapata"],"Carabaya":["Macusani","Ajoyani","Ayapata","Coasa","Corani","Crucero","Ituata","Ollachea","San GabÃ¡n","Usicayos"],"Chucuito":["Juli","Desaguadero","Huacullani","Kelluyo","Pisacoma","Pomata","Zepita"],"El Collao":["Ilave","Capazo","Pilcuyo","Santa Rosa","Conduriri"],"HuancanÃ©":["HuancanÃ©","Cojata","Huatasani","Inchupalla","Pusi","Rosaspata","Taraco","Vilque Chico"],"Lampa":["Lampa","Cabanilla","Calapuja","Nicasio","Ocuviri","Palca","Paratia","PucarÃ¡","Santa LucÃ­a","Vilavila"],"Melgar":["Ayaviri","Antauta","Cupi","Llalli","Macari","NuÃ±oa","Orurillo","Santa Rosa","Umachiri"],"Moho":["Moho","Conima","Huayrapata","Tilali"],"San Antonio de Putina":["Putina","Ananea","Pedro Vilca Apaza","Quilcapuncu","Sina"],"San RomÃ¡n":["Juliaca","Cabana","Cabanillas","Caracoto","San Miguel"],"Sandia":["Sandia","Cuyocuyo","Limbani","Patambuco","Phara","Quiaca","San Juan del Oro","Yanahuaya","Alto Inambari"],"Yunguyo":["Yunguyo","Anapia","Copani","Cuturapi","Ollaraya","Tinicachi","Unicachi"]},
-      "San MartÃ­n":{"Moyobamba":["Moyobamba","Calzada","Habana","Jepelacio","Soritor","Yantalo"],"Bellavista":["Bellavista","Alto Biavo","Bajo Biavo","Huallaga","San Pablo","San Rafael"],"El Dorado":["San JosÃ© de Sisa","Agua Blanca","San MartÃ­n","Santa Rosa","Shatoja"],"Huallaga":["Saposoa","Alto Saposoa","El EslabÃ³n","Piscoyacu","Sacanche","Tingo de Saposoa"],"Lamas":["Lamas","Alonso de Alvarado","Barranquita","Caynarachi","CuÃ±umbuqui","Pinto Recodo","Rumisapa","San Roque de Cumbaza","Shanao","Tabalosos","Zapatero"],"Mariscal CÃ¡ceres":["Juanjui","Campanilla","Huicungo","Pachiza","Pajarillo"],"Picota":["Picota","Buenos Aires","Caspizapa","Pilluana","Pucacaca","San CristÃ³bal","San HilariÃ³n","Shamboyacu","Tingo de Ponasa","Tres Unidos"],"Rioja":["Rioja","Awajun","ElÃ­as SoplÃ­n Vargas","Nueva Cajamarca","Pardo Miguel","Posic","San Fernando","Yorongos","Yuracyacu"],"San MartÃ­n":["Tarapoto","Alberto Leveau","Cacatachi","Chazuta","Chipurana","El Porvenir","Huimbayoc","Juan Guerra","La Banda de Shilcayo","Morales","Papaplaya","San Antonio","Santa Rosa","Shapaja"],"Tocache":["Tocache","Nuevo Progreso","PÃ³lvora","Shunte","Uchiza"]},
-      "Tacna":{"Tacna":["Tacna","Alto de la Alianza","Calana","Ciudad Nueva","Inclan","Pachia","Palca","Pocollay","Sama","Coronel Gregorio AlbarracÃ­n Lanchipa","La Yarada Los Palos"],"Candarave":["Candarave","Cairani","Camilaca","Curibaya","Huanuara","Quilahuani"],"Jorge Basadre":["Locumba","Ilabaya","Ite"],"Tarata":["Tarata","Estique","Estique-Pampa","Sitajara","Susapaya","Tarucachi","Ticaco"]},
-      "Tumbes":{"Tumbes":["Tumbes","Corrales","La Cruz","Pampas de Hospital","San Jacinto","San Juan de la Virgen"],"Contralmirante Villar":["Zorritos","Casitas","Canoas de Punta Sal"],"Zarumilla":["Zarumilla","Aguas Verdes","Matapalo","Papayal"]},
-      "Ucayali":{"Coronel Portillo":["CallerÃ­a","Campoverde","IparÃ­a","Masisea","Yarinacocha","Nueva Requena","Manantay"],"Atalaya":["Raymondi","Sepahua","TahuanÃ­a","YurÃºa"],"Padre Abad":["Padre Abad","Irazola","CurimanÃ¡","Neshuya"],"PurÃºs":["PurÃºs"]}
-    };
-    </script>
+        if (error) {
+            results.innerHTML = '<p class="directory-message">Directorio temporalmente no disponible.</p>';
+            return;
+        }
+        if (!data.length) {
+            results.innerHTML = '<p class="directory-message">No se encontraron miembros activos.</p>';
+            return;
+        }
+        const safeText = value => String(value || '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+        results.innerHTML = data.map(item => `
+            <article class="directory-result">
+                <strong>${safeText(item.nombre)}</strong>
+                <span>${safeText(item.iglesia || 'Sede no indicada')}</span>
+            </article>
+        `).join('');
+    }
+
+    document.getElementById('directoryButton').addEventListener('click', searchDirectory);
+    document.getElementById('directorySearch').addEventListener('keydown', event => {
+        if (event.key === 'Enter') searchDirectory();
+    });
+
+    const map = L.map('map', { zoomControl: false }).setView([-6.492, -76.381], 13);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: 'Â© OpenStreetMap & CARTO',
+        maxZoom: 19
+    }).addTo(map);
+
+    const CHURCHES = [
+        { name: 'Central Tarapoto', lat: -6.4960, lng: -76.3661 },
+        { name: 'Morales',          lat: -6.4794, lng: -76.3965 },
+        { name: 'Santa Anita',      lat: -6.5008, lng: -76.3877 },
+        { name: '10 de Agosto',     lat: -6.4996, lng: -76.3779 },
+    ];
+
+    const createElegantIcon = (name) => L.divIcon({
+        className: 'elegant-pin',
+        html: `<div class="pin-pulse"></div><div class="pin-core"></div><span class="pin-label">${name}</span>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        popupAnchor: [0, -20]
+    });
+
+    CHURCHES.forEach(c => {
+        // Enlace CORRECTO oficial para crear ruta en Google Maps (abre app o web)
+        const gmapsLink = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
+        
+        L.marker([c.lat, c.lng], { icon: createElegantIcon(c.name) })
+            .addTo(map)
+            .bindPopup(`
+                <div class="popup-title">${c.name}</div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 4px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.1em;">IASD Mov. de Reforma</div>
+                <a href="${gmapsLink}" target="_blank" rel="noopener noreferrer" class="popup-btn"> CÃ³mo Llegar</a>
+            `);
+    });
+</script>
 </body>
 </html>
+
 
 
