@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMINIASDIMOR — Fe y Esperanza | Tarapoto</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Paleta Oficial del Logo */
+            --logo-blue:       #1a4f8a;
+            --logo-blue-dark:  #0a1c3c;
+            --logo-orange:     #E05C1A;
+            --logo-orange-dim: rgba(224, 92, 26, 0.15);
+            
+            /* Colores de Contraste */
+            --white:           #ffffff;
+            --pearl:           #f8fafc;
+            --text-dark:       #1e293b;
+            --text-light:      #f1f5f9;
+            --text-muted:      #94a3b8;
+            
+            /* Sombras Elegantes */
+            --shadow-soft:     0 10px 40px rgba(10, 28, 60, 0.08);
+            --shadow-dark:     0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-dark); 
+            background: var(--pearl); 
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ===== ELEMENTOS FLOTANTES (LUZ DIVINA) ===== */
+        .divine-light {
+            position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+        }
+        .light-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--logo-orange-dim); }
+        .light-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: rgba(26, 79, 138, 0.2); }
+
+        /* ===== NAVBAR ===== */
+        #navbar {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(10, 28, 60, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        #navbar.scrolled {
+            background: var(--white);
+            box-shadow: var(--shadow-soft);
+            border-bottom: 1px solid rgba(26, 79, 138, 0.1);
+        }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; height: 75px;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-brand img { 
+            width: 36px; height: auto; object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .nav-brand:hover img { transform: scale(1.05); }
+        .nav-brand-text { display: flex; flex-direction: column; }
+        .nav-brand-text span:first-child { 
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: 0.1em; transition: color 0.3s;
+        }
+        .nav-brand-text span:last-child { 
+            font-size: 8.5px; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.15em; transition: color 0.3s;
+        }
+        
+        #navbar.scrolled .nav-brand-text span:first-child { color: var(--logo-blue-dark); }
+        #navbar.scrolled .nav-brand-text span:last-child { color: var(--logo-blue); }
+        #navbar.scrolled .nav-links a:not(.btn-elegant) { color: var(--logo-blue-dark); }
+        
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a:not(.btn-elegant) { 
+            color: var(--white); text-decoration: none; font-size: 10px; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 0.15em; transition: 0.3s; position: relative;
+        }
+        .nav-links a:not(.btn-elegant)::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -6px; left: 0;
+            background-color: var(--logo-orange); transition: width 0.3s ease;
+        }
+        .nav-links a:not(.btn-elegant):hover::after { width: 100%; }
+        
+        .btn-elegant {
+            background: var(--logo-orange); color: var(--white); text-decoration: none;
+            padding: 10px 22px; border-radius: 6px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.15em; border: 1px solid var(--logo-orange);
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(224, 92, 26, 0.3);
+        }
+        .btn-elegant:hover { 
+            background: var(--logo-blue-dark); border-color: var(--logo-blue-dark);
+            box-shadow: 0 6px 20px rgba(10, 28, 60, 0.4); transform: translateY(-2px);
+        }
+
+        /* ===== HERO ===== */
+        #hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 120px 2rem 60px; position: relative;
+            background: linear-gradient(145deg, var(--logo-blue-dark) 0%, var(--logo-blue) 100%);
+            color: var(--white); overflow: hidden;
+        }
+        
+        @keyframes float-gentle {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-content { position: relative; z-index: 10; max-width: 850px; animation: float-gentle 8s ease-in-out infinite; }
+        .hero-badge {
+            display: inline-block; padding: 8px 20px; border-radius: 30px;
+            border: 1px solid rgba(224, 92, 26, 0.4); background: rgba(255, 255, 255, 0.05);
+            font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--logo-orange); margin-bottom: 28px; backdrop-filter: blur(10px);
+        }
+        #hero h1 {
+            font-family: 'Cinzel', serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 600; line-height: 1.1; margin-bottom: 24px; color: var(--white);
+        }
+        #hero h1 em { 
+            font-family: 'Playfair Display', serif; font-style: italic; color: var(--logo-orange); 
+        }
+        .hero-sub { 
+            font-size: 1.1rem; color: var(--text-light); margin-bottom: 45px; 
+            font-weight: 300; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.9;
+        }
+
+        /* ===== SECTIONS GENERIC ===== */
+        .section-padding { padding: 100px 2rem; position: relative; }
+        .section-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-label { 
+            color: var(--logo-orange); font-size: 10px; font-weight: 700; letter-spacing: 0.3em; 
+            text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .section-label::before, .section-label::after { content: ''; width: 30px; height: 1.5px; background: var(--logo-orange); opacity: 0.6; }
+        .section-title { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--logo-blue-dark); font-weight: 600; }
+
+        /* ===== 3D CARDS ===== */
+        .bg-light { background: var(--pearl); }
+        .grid-3d { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 30px; perspective: 1200px; 
+        }
+        .card-3d {
+            background: var(--white); border: 1px solid rgba(26, 79, 138, 0.08);
+            border-radius: 12px; padding: 40px 30px; text-align: center;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .card-3d::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: var(--logo-orange); border-radius: 0 0 12px 12px;
+            transform: scaleX(0); transition: transform 0.4s ease; transform-origin: center;
+        }
+        .card-3d:hover {
+            transform: translateY(-12px) rotateX(5deg) rotateY(-5deg);
+            box-shadow: 20px 30px 40px rgba(26, 79, 138, 0.1);
+            border-color: rgba(224, 92, 26, 0.3);
+        }
+        .card-3d:hover::after { transform: scaleX(1); }
+        .card-icon { 
+            font-size: 2.5rem; margin-bottom: 20px; color: var(--logo-blue);
+            transform: translateZ(40px); display: inline-block; transition: transform 0.4s;
+        }
+        .card-3d:hover .card-icon { transform: translateZ(50px) scale(1.1); color: var(--logo-orange); }
+        .card-3d h4 { 
+            font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--logo-blue-dark); 
+            margin-bottom: 12px; transform: translateZ(30px); font-weight: 700;
+        }
+        .card-3d p { color: var(--text-dark); font-size: 0.95rem; transform: translateZ(20px); opacity: 0.8; }
+
+        /* ===== MAPA ELEGANTE ===== */
+        .map-container {
+            border-radius: 12px; overflow: hidden; padding: 8px;
+            background: var(--white); box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(26, 79, 138, 0.1);
+        }
+        #map { height: 450px; border-radius: 8px; background: #f8fafc; z-index: 1; }
+        
+        .elegant-pin { display: flex; align-items: center; justify-content: center; }
+        .pin-core { 
+            width: 16px; height: 16px; background: var(--logo-orange); border-radius: 50%; 
+            position: relative; z-index: 2; box-shadow: 0 0 0 4px var(--white), 0 4px 10px rgba(0,0,0,0.2); 
+        }
+        .pin-pulse { 
+            position: absolute; width: 45px; height: 45px; background: rgba(224, 92, 26, 0.3); 
+            border-radius: 50%; animation: pulse-soft 2.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1); 
+        }
+        .pin-label {
+            position: absolute; left: 29px; top: 50%; transform: translateY(-50%);
+            padding: 4px 8px; border-radius: 999px; white-space: nowrap;
+            background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(26, 79, 138, 0.14);
+            box-shadow: 0 5px 16px rgba(10, 28, 60, 0.12);
+            color: var(--logo-blue-dark); font-size: 9px; font-weight: 700;
+            font-family: 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        @keyframes pulse-soft {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .leaflet-popup-content-wrapper { 
+            background: var(--logo-blue-dark); color: var(--white); border-radius: 8px; 
+            box-shadow: 0 15px 35px rgba(10, 28, 60, 0.3); border: 1px solid rgba(255,255,255,0.1); padding: 4px;
+        }
+        .leaflet-popup-tip { background: var(--logo-blue-dark); }
+        .popup-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--logo-orange); margin-bottom: 6px; font-weight: 700; }
+        .popup-btn {
+            display: inline-flex; align-items: center; justify-content: center; margin-top: 12px; 
+            padding: 8px 16px; background: var(--white); color: var(--logo-blue-dark); 
+            text-decoration: none; border-radius: 4px; font-size: 10px; font-weight: 700; 
+            text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s; width: 100%;
+        }
+        .popup-btn:hover { background: var(--logo-orange); color: var(--white); }
+
+        /* ===== SEARCH PANEL ===== */
+        .bg-dark-section { background: var(--logo-blue-dark); color: var(--white); }
+        .bg-dark-section .section-title { color: var(--white); }
+        
+        .search-glass {
+            padding: 50px; border-radius: 16px; 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: var(--shadow-dark);
+            display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+        }
+        .input-elegant {
+            flex: 1; min-width: 250px; background: rgba(255, 255, 255, 0.06); 
+            border: 1px solid rgba(255, 255, 255, 0.15); padding: 18px 24px; 
+            border-radius: 8px; color: var(--white); font-family: inherit; transition: all 0.3s; outline: none; font-size: 0.95rem;
+        }
+        .input-elegant::placeholder { color: rgba(255,255,255,0.4); }
+        .input-elegant:focus { border-color: var(--logo-orange); background: rgba(255, 255, 255, 0.1); }
+        .directory-results { flex-basis: 100%; display: grid; gap: 10px; margin-top: 10px; }
+        .directory-result {
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            padding: 13px 16px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .directory-result strong {
+            display: block; color: var(--white); font-size: 12px; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .directory-result span, .directory-message {
+            color: rgba(255,255,255,0.58); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+        }
+        .directory-message { flex-basis: 100%; text-align: center; padding: 14px 0 0; }
+
+    </style>
+</head>
+<body>
+
+<section id="hero">
+    <div class="divine-light light-1"></div>
+    <div class="divine-light light-2"></div>
+    
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <img src="https://i.postimg.cc/FzpMRdx4/1074ad9b-e99d-4891-a0ee-3ad298b86a68-removalai-preview.png" alt="Logo AMINIASDIMOR">
+                <div class="nav-brand-text">
+                    <span>AMINIASDIMOR</span>
+                    <span>Unión Peruana</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="#sedes">Congregaciones</a>
+                <a href="#mapa">Mapa de Sedes</a>
+                <a href="./index.html" class="btn-elegant">Acceso Sistema</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <div class="hero-badge">Misión Oriente · San Martín</div>
+        <h1>Fundados en la <em>Verdad</em><br>Guiados por la Fe</h1>
+        <p class="hero-sub">Iglesia Adventista del Séptimo Día, Movimiento de Reforma.<br>Predicando el evangelio eterno con reverencia y dedicación.</p>
+        <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
+            <a href="#mapa" class="btn-elegant">Encontrar una Iglesia</a>
+            <a href="#buscador" class="btn-elegant" style="background: transparent; color: var(--white); border-color: rgba(255,255,255,0.3); box-shadow: none;">Directorio</a>
+        </div>
+    </div>
+</section>
+
+<section id="sedes" class="section-padding bg-light">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">Comunidad y Fe</div>
+            <h2 class="section-title">Congregaciones en Tarapoto</h2>
+        </div>
+        
+        <div class="grid-3d">
+            <div class="card-3d">
+                <span class="card-icon">️</span>
+                <h4>Central Tarapoto</h4>
+                <p>El núcleo principal de adoración y reuniones espirituales en el corazón de la ciudad.</p>
+            </div>
+            <div class="card-3d">
+                <span class="card-icon">️</span>
+                <h4>Morales</h4>
+                <p>Un refugio de paz y comunión para nuestros hermanos en el distrito de Morales.</p>
+            </div>
+            <div class="card-3d">
+                <span class="card-icon"></span>
+                <h4>Santa Anita</h4>
+                <p>Congregación dedicada al estudio profundo y la expansión del mensaje eterno.</p>
+            </div>
+            <div class="card-3d">
+                <span class="card-icon">️</span>
+                <h4>10 de Agosto</h4>
+                <p>Una comunidad vibrante, unida en el amor fraternal y el servicio cristiano.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="mapa" class="section-padding bg-light" style="padding-top: 0;">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-label">Rutas de Esperanza</div>
+            <h2 class="section-title">Encuentre su Camino</h2>
+            <p style="color: var(--text-muted); margin-top: 10px;">Seleccione una ubicación para iniciar la navegación guiada hacia nuestras puertas.</p>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+</section>
+
+<section id="buscador" class="section-padding bg-dark-section">
+    <div class="section-inner">
+        <div class="search-glass">
+            <div style="flex: 1; min-width: 300px;">
+                <div class="section-label" style="justify-content: flex-start; margin-bottom: 8px;">Directorio Interno</div>
+                <h2 class="section-title" style="font-size: 2rem; margin:0; text-align: left;">Búsqueda de Miembros</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; margin-top: 5px;">Consulte el registro oficial de la Misión Oriente.</p>
+            </div>
+            <input type="text" id="directorySearch" class="input-elegant" placeholder="Ingrese el nombre del hermano(a)...">
+            <button type="button" id="directoryButton" class="btn-elegant" style="padding: 18px 36px; border-radius: 8px; font-size: 11px;">Consultar Base</button>
+            <div id="directoryResults" class="directory-results" aria-live="polite"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const SUPABASE_URL = 'https://ughkmxbhuzdhzuydymfs.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnaGtteGJodXpkaHp1eWR5bWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDE5NjMsImV4cCI6MjA4OTUxNzk2M30.sYk_I_ZqVsTERf__f9VEkiFGG0JdhBnqW4a9rLya4W4';
+    const publicDirectoryClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    async function searchDirectory() {
+        const term = document.getElementById('directorySearch').value.trim();
+        const results = document.getElementById('directoryResults');
+        if (term.length < 2) {
+            results.innerHTML = '<p class="directory-message">Ingrese al menos dos letras para buscar.</p>';
+            return;
+        }
+
+        results.innerHTML = '<p class="directory-message">Consultando directorio...</p>';
+        const { data, error } = await publicDirectoryClient
+            .from('directorio_publico')
+            .select('nombre,iglesia')
+            .ilike('nombre', `%${term}%`)
+            .order('nombre')
+            .limit(20);
+
+        if (error) {
+            results.innerHTML = '<p class="directory-message">Directorio temporalmente no disponible.</p>';
+            return;
+        }
+        if (!data.length) {
+            results.innerHTML = '<p class="directory-message">No se encontraron miembros activos.</p>';
+            return;
+        }
+        const safeText = value => String(value || '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+        results.innerHTML = data.map(item => `
+            <article class="directory-result">
+                <strong>${safeText(item.nombre)}</strong>
+                <span>${safeText(item.iglesia || 'Sede no indicada')}</span>
+            </article>
+        `).join('');
+    }
+
+    document.getElementById('directoryButton').addEventListener('click', searchDirectory);
+    document.getElementById('directorySearch').addEventListener('keydown', event => {
+        if (event.key === 'Enter') searchDirectory();
+    });
+
+    const map = L.map('map', { zoomControl: false }).setView([-6.492, -76.381], 13);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap & CARTO',
+        maxZoom: 19
+    }).addTo(map);
+
+    const CHURCHES = [
+        { name: 'Central Tarapoto', lat: -6.4960, lng: -76.3661 },
+        { name: 'Morales',          lat: -6.4794, lng: -76.3965 },
+        { name: 'Santa Anita',      lat: -6.5008, lng: -76.3877 },
+        { name: '10 de Agosto',     lat: -6.4996, lng: -76.3779 },
+    ];
+
+    const createElegantIcon = (name) => L.divIcon({
+        className: 'elegant-pin',
+        html: `<div class="pin-pulse"></div><div class="pin-core"></div><span class="pin-label">${name}</span>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        popupAnchor: [0, -20]
+    });
+
+    CHURCHES.forEach(c => {
+        // Enlace CORRECTO oficial para crear ruta en Google Maps (abre app o web)
+        const gmapsLink = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
+        
+        L.marker([c.lat, c.lng], { icon: createElegantIcon(c.name) })
+            .addTo(map)
+            .bindPopup(`
+                <div class="popup-title">${c.name}</div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 4px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.1em;">IASD Mov. de Reforma</div>
+                <a href="${gmapsLink}" target="_blank" rel="noopener noreferrer" class="popup-btn"> Cómo Llegar</a>
+            `);
+    });
+</script>
+</body>
+</html>

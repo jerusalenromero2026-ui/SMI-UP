@@ -1,0 +1,23 @@
+﻿# Datos personales y respaldos locales
+*.json
+*.xlsx
+*.xls
+*.csv
+
+# SQL auxiliar con datos importables o configuración sensible
+*.sql
+
+# Documentos internos de migración
+*.md
+*.txt
+
+# Imágenes y archivos locales no acordados para publicación
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+
+# Archivos del sistema/editor
+.DS_Store
+Thumbs.db
