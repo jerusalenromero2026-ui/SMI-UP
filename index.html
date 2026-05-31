@@ -175,9 +175,21 @@
         .card-3d:hover::after { transform: scaleX(1); }
         .card-icon { 
             font-size: 2.5rem; margin-bottom: 20px; color: var(--logo-blue);
-            transform: translateZ(40px); display: inline-block; transition: transform 0.4s;
+            transform: translateZ(40px); display: inline-flex; transition: transform 0.4s;
         }
-        .card-3d:hover .card-icon { transform: translateZ(50px) scale(1.1); color: var(--logo-orange); }
+        .church-card-icon {
+            width: 64px; height: 64px; align-items: center; justify-content: center;
+            margin-bottom: 18px; border-radius: 18px;
+            background: linear-gradient(145deg, rgba(26,79,138,0.10), rgba(224,92,26,0.12));
+            border: 1px solid rgba(26,79,138,0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 12px 28px rgba(10,28,60,0.08);
+            font-size: 2rem;
+        }
+        .sede-kicker {
+            display: inline-block; margin-bottom: 10px; color: var(--logo-orange);
+            font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+        }
+        .card-3d:hover .card-icon { transform: translateZ(50px) scale(1.08); color: var(--logo-orange); }
         .card-3d h4 { 
             font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--logo-blue-dark); 
             margin-bottom: 12px; transform: translateZ(30px); font-weight: 700;
@@ -193,20 +205,28 @@
         #map { height: 450px; border-radius: 8px; background: #f8fafc; z-index: 1; }
         
         .elegant-pin { display: flex; align-items: center; justify-content: center; }
-        .pin-core { 
-            width: 16px; height: 16px; background: var(--logo-orange); border-radius: 50%; 
-            position: relative; z-index: 2; box-shadow: 0 0 0 4px var(--white), 0 4px 10px rgba(0,0,0,0.2); 
+        .pin-core {
+            width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+            background: var(--white); color: var(--logo-blue-dark); border-radius: 12px;
+            position: relative; z-index: 2; border: 2px solid var(--logo-orange);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.95), 0 10px 24px rgba(0,0,0,0.28);
+            font-size: 18px; line-height: 1;
         }
-        .pin-pulse { 
-            position: absolute; width: 45px; height: 45px; background: rgba(224, 92, 26, 0.3); 
-            border-radius: 50%; animation: pulse-soft 2.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1); 
+        .pin-core::after {
+            content: ''; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%) rotate(45deg);
+            width: 12px; height: 12px; background: var(--white); border-right: 2px solid var(--logo-orange); border-bottom: 2px solid var(--logo-orange);
+            border-radius: 0 0 3px 0;
+        }
+        .pin-pulse {
+            position: absolute; width: 58px; height: 58px; background: rgba(224, 92, 26, 0.24);
+            border-radius: 18px; animation: pulse-soft 2.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
         }
         .pin-label {
-            position: absolute; left: 29px; top: 50%; transform: translateY(-50%);
-            padding: 4px 8px; border-radius: 999px; white-space: nowrap;
+            position: absolute; left: 42px; top: 50%; transform: translateY(-50%);
+            padding: 5px 9px; border-radius: 999px; white-space: nowrap;
             background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(26, 79, 138, 0.14);
-            box-shadow: 0 5px 16px rgba(10, 28, 60, 0.12);
-            color: var(--logo-blue-dark); font-size: 9px; font-weight: 700;
+            box-shadow: 0 5px 16px rgba(10, 28, 60, 0.16);
+            color: var(--logo-blue-dark); font-size: 9px; font-weight: 800;
             font-family: 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
         }
         @keyframes pulse-soft {
@@ -409,8 +429,8 @@
     const map = L.map('map', { zoomControl: false }).setView([-6.492, -76.381], 13);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap & CARTO',
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri, Maxar, Earthstar Geographics',
         maxZoom: 19
     }).addTo(map);
 
@@ -423,10 +443,10 @@
 
     const createElegantIcon = (name) => L.divIcon({
         className: 'elegant-pin',
-        html: `<div class="pin-pulse"></div><div class="pin-core"></div><span class="pin-label">${name}</span>`,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
-        popupAnchor: [0, -20]
+        html: `<div class="pin-pulse"></div><div class="pin-core" aria-hidden="true">&#9962;</div><span class="pin-label">${name}</span>`,
+        iconSize: [58, 58],
+        iconAnchor: [17, 42],
+        popupAnchor: [0, -42]
     });
 
     CHURCHES.forEach(c => {
