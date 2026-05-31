@@ -534,22 +534,22 @@
 
                     const menus = {
                         superadmin: [
-                            { t: 'Dashboard',          i: '📊', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'Directorio Global',  i: '&#127757;', a: () => App.UI.Views.renderMembers() },
-                            { t: 'Gestión de Sedes',   i: '⛪', a: () => App.UI.Views.renderChurches() },
-                            { t: 'Gestión de Usuarios',i: '👥', a: () => App.UI.Views.renderUsers() },
-                            { t: 'Transferencias',     i: '🔄', a: () => App.UI.Views.renderTransfers() },
+                            { t: 'Dashboard',          i: '&#128202;', a: () => App.UI.Views.renderDashboard() },
+                            { t: 'Directorio Global',  i: '&#128214;', a: () => App.UI.Views.renderMembers() },
+                            { t: 'Gestión de Sedes',   i: '&#9962;', a: () => App.UI.Views.renderChurches() },
+                            { t: 'Gestión de Usuarios',i: '&#128101;', a: () => App.UI.Views.renderUsers() },
+                            { t: 'Transferencias',     i: '&#8644;', a: () => App.UI.Views.renderTransfers() },
                         ],
                         pastor: [
-                            { t: 'Dashboard',          i: '📊', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'Membresía',          i: '👥', a: () => App.UI.Views.renderMembers() },
-                            { t: 'Transferencias',     i: '🔄', a: () => App.UI.Views.renderTransfers() },
-                            { t: 'Nueva Sede',         i: '⛪', a: () => App.UI.Modals.openSedeRegistration() },
+                            { t: 'Dashboard',          i: '&#128202;', a: () => App.UI.Views.renderDashboard() },
+                            { t: 'Membresía',          i: '&#128214;', a: () => App.UI.Views.renderMembers() },
+                            { t: 'Transferencias',     i: '&#8644;', a: () => App.UI.Views.renderTransfers() },
+                            { t: 'Nueva Sede',         i: '&#9962;', a: () => App.UI.Modals.openSedeRegistration() },
                         ],
                         sede: [
-                            { t: 'Dashboard',              i: '📊', a: () => App.UI.Views.renderDashboard() },
-                            { t: 'Mi Membresía',           i: '👥', a: () => App.UI.Views.renderMembers() },
-                            { t: 'Peticiones de Traslado', i: '📤', a: () => App.UI.Views.renderTransferRequests() },
+                            { t: 'Dashboard',              i: '&#128202;', a: () => App.UI.Views.renderDashboard() },
+                            { t: 'Mi Membresía',           i: '&#128214;', a: () => App.UI.Views.renderMembers() },
+                            { t: 'Peticiones de Traslado', i: '&#128228;', a: () => App.UI.Views.renderTransferRequests() },
                         ]
                     };
 
@@ -735,12 +735,12 @@
                                                         : `<span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[8px] font-bold uppercase flex items-center gap-1 w-max"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>Activo</span>`}
                                                 </td>
                                                 <td class="px-8 py-4 text-right">
-                                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button title="Ver Credencial" onclick="App.UI.Modals.viewCredential(${obj.id})" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">?</button>
-                                                        ${['superadmin','pastor','sede'].includes(rol) ? `<button title="Editar" onclick="App.UI.Modals.openMemberEditor(${obj.id})" class="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-500 hover:text-white transition-colors">&#127968;</button>` : ''}
-                                                        ${rol === 'sede' ? `<button title="Solicitar Traslado" onclick="App.UI.Modals.openTransferRequestModal(${obj.id})" class="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-colors">📤</button>` : ''}
-                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Transferir" onclick="App.UI.Modals.openTransferModal(${obj.id})" class="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-colors">🔄</button>` : ''}
-                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Eliminar" onclick="App.Members.delete(${obj.id})" class="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">🗑</button>` : ''}
+                                                    <div class="flex justify-end gap-2">
+                                                        <button title="Ver ficha y descargar PDF" onclick="App.UI.Modals.viewCredential(${obj.id})" class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider border border-blue-100">Ficha / PDF</button>
+                                                        ${['superadmin','pastor','sede'].includes(rol) ? `<button title="Editar miembro" onclick="App.UI.Modals.openMemberEditor(${obj.id})" class="px-3 py-2 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-500 hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider border border-amber-100">Editar</button>` : ''}
+                                                        ${rol === 'sede' ? `<button title="Solicitar traslado" onclick="App.UI.Modals.openTransferRequestModal(${obj.id})" class="px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-600 hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider border border-purple-100">Traslado</button>` : ''}
+                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Transferir miembro" onclick="App.UI.Modals.openTransferModal(${obj.id})" class="px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-600 hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider border border-purple-100">Mover</button>` : ''}
+                                                        ${['superadmin','pastor'].includes(rol) ? `<button title="Eliminar miembro" onclick="App.Members.delete(${obj.id})" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider border border-red-100">Eliminar</button>` : ''}
                                                     </div>
                                                 </td>
                                             </tr>`).join('') || `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-400 font-bold text-[11px] uppercase">No se encontraron registros</td></tr>`}
