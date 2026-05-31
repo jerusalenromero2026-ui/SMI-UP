@@ -1,0 +1,15 @@
+﻿*.json
+*.xlsx
+*.xls
+*.csv
+*.sql
+*.md
+*.txt
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+.git
+.gitignore
+.vercel
